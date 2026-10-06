@@ -1,16 +1,16 @@
 name: Release
 
-# Publishes `deepsec` to npm via OIDC Trusted Publishing — no NPM_TOKEN
+# Publishes `@anolilab/deepsec` to npm via OIDC Trusted Publishing — no NPM_TOKEN
 # secret in the repo. The workflow proves its identity via a GitHub OIDC
 # token; npm verifies it against a Trusted Publisher you register on
 # npmjs.com.
 #
 # One-time setup on npmjs.com:
-#   1. Visit https://www.npmjs.com/package/deepsec/access (must be a
+#   1. Visit https://www.npmjs.com/package/@anolilab/deepsec/access (must be a
 #      maintainer of the package).
 #   2. Under "Publishing access" → "Trusted Publisher", click Configure.
 #   3. Pick "GitHub Actions" and fill in:
-#        Organization or user:  vercel-labs
+#        Organization or user:  anolilab
 #        Repository:            deepsec
 #        Workflow filename:     release.yml
 #        Environment name:      (leave blank)
@@ -59,14 +59,14 @@ jobs:
         run: |
           set -eo pipefail
           LOCAL=$(node -p "require('./packages/deepsec/package.json').version")
-          PUBLISHED=$(npm view deepsec version 2>/dev/null || true)
+          PUBLISHED=$(npm view @anolilab/deepsec version 2>/dev/null || true)
           echo "local=$LOCAL" >> "$GITHUB_OUTPUT"
           if [ "$LOCAL" != "$PUBLISHED" ]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Will publish deepsec@$LOCAL (currently on npm: ${PUBLISHED:-<none>})"
+            echo "::notice::Will publish @anolilab/deepsec@$LOCAL (currently on npm: ${PUBLISHED:-<none>})"
           else
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::deepsec@$LOCAL already on npm — skipping publish"
+            echo "::notice::@anolilab/deepsec@$LOCAL already on npm — skipping publish"
           fi
 
       # Everything below only runs when there's a new version to ship. Gating
@@ -119,7 +119,7 @@ jobs:
       # `npm publish` runs the package's prepublishOnly hook (`pnpm -w validate`)
       # and then prepack (`pnpm bundle`) — full validation + fresh bundle ship
       # together. With `id-token: write` set above and a Trusted Publisher
-      # configured for `deepsec` on npmjs.com (see comment at top of file),
+      # configured for `@anolilab/deepsec` on npmjs.com (see comment at top of file),
       # npm exchanges the GitHub OIDC token for a publish credential at
       # publish time. No NPM_TOKEN / NODE_AUTH_TOKEN secret is consulted.
       #

@@ -57,12 +57,19 @@ export function probeWorkspaceInstall(
   reason?: string;
 } {
   const exists = options.settle ? existsSettled : fs.existsSync;
-  const packageFile = path.join(workspaceDir, "node_modules", "deepsec", "package.json");
-  if (!exists(packageFile)) return { ok: false, reason: "node_modules/deepsec is missing" };
+  const packageFile = path.join(
+    workspaceDir,
+    "node_modules",
+    "@anolilab",
+    "deepsec",
+    "package.json",
+  );
+  if (!exists(packageFile))
+    return { ok: false, reason: "node_modules/@anolilab/deepsec is missing" };
   try {
     const pkg = JSON.parse(fs.readFileSync(packageFile, "utf8"));
     for (const relative of ["dist/cli.mjs", "dist/config.mjs"]) {
-      if (!exists(path.join(workspaceDir, "node_modules", "deepsec", relative))) {
+      if (!exists(path.join(workspaceDir, "node_modules", "@anolilab", "deepsec", relative))) {
         return { ok: false, reason: `deepsec/${relative} is missing` };
       }
     }

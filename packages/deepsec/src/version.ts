@@ -14,7 +14,7 @@ function getDeepsecPackageRoot(): string {
     if (fs.existsSync(pkgPath)) {
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-        if (pkg.name === "deepsec" && typeof pkg.version === "string") {
+        if (pkg.name === "@anolilab/deepsec" && typeof pkg.version === "string") {
           cachedPackageRoot = dir;
           return dir;
         }
@@ -25,14 +25,14 @@ function getDeepsecPackageRoot(): string {
     dir = path.dirname(dir);
   }
   throw new Error(
-    "Could not locate the deepsec package.json (no ancestor with name === 'deepsec' found)",
+    "Could not locate the deepsec package.json (no ancestor with name === '@anolilab/deepsec' found)",
   );
 }
 
 /**
  * Read the version string from the deepsec package's package.json. Walks
  * up from this module's location looking for the nearest package.json
- * whose `name` is `"deepsec"`.
+ * whose `name` is `"@anolilab/deepsec"`.
  *
  * Works the same way in dev (tsx running source — package.json is at
  * `packages/deepsec/`) and in production (bundled dist — package.json
@@ -40,7 +40,7 @@ function getDeepsecPackageRoot(): string {
  *
  * Used by:
  *   - cli.ts to populate `commander.version()`.
- *   - init.ts to pin the scaffolded `dependencies.deepsec` to whatever
+ *   - init.ts to pin the scaffolded `dependencies["@anolilab/deepsec"]` to whatever
  *     this CLI was published as, so a fresh `pnpm install` in the
  *     scaffolded `.deepsec/` actually resolves to a real version on npm.
  */

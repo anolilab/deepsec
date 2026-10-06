@@ -155,8 +155,8 @@ function injectStubPlugin(configPath: string): void {
   const original = fs.readFileSync(configPath, "utf-8");
   const patched = original
     .replace(
-      'import { defineConfig } from "deepsec/config";\n',
-      'import { defineConfig } from "deepsec/config";\nimport stubPlugin from "./stub-plugin.mjs";\n',
+      'import { defineConfig } from "@anolilab/deepsec/config";\n',
+      'import { defineConfig } from "@anolilab/deepsec/config";\nimport stubPlugin from "./stub-plugin.mjs";\n',
     )
     .replace(/plugins:\s*\[/, "plugins: [stubPlugin, ");
   if (patched === original) {
@@ -179,7 +179,7 @@ describe("pipeline e2e", () => {
 
       // Symlink the source repo's node_modules into both tmp/ and the
       // workspace dir so deepsec.config.ts (which imports
-      // `deepsec/config`) and the bundled CLI's jiti loader can resolve
+      // `@anolilab/deepsec/config`) and the bundled CLI's jiti loader can resolve
       // the package without a real `pnpm install` round-trip.
       fs.symlinkSync(path.join(ROOT, "node_modules"), path.join(tmp, "node_modules"), "dir");
 
@@ -197,7 +197,7 @@ describe("pipeline e2e", () => {
       injectStubPlugin(path.join(workspaceDir, "deepsec.config.ts"));
 
       // Make node_modules visible from the workspace (jiti resolves
-      // `deepsec/config` against the cwd's node_modules).
+      // `@anolilab/deepsec/config` against the cwd's node_modules).
       fs.symlinkSync(
         path.join(tmp, "node_modules"),
         path.join(workspaceDir, "node_modules"),

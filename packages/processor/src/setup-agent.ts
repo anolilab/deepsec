@@ -1,5 +1,6 @@
 import { runClaudeSetupTask } from "./agents/claude-agent-sdk.js";
 import { runCodexSetupTask } from "./agents/codex-sdk.js";
+import { runOpenCodeSetupTask } from "./agents/opencode-sdk.js";
 import { runPiSetupTask } from "./agents/pi-sdk.js";
 import type { SetupTaskParams } from "./agents/types.js";
 
@@ -15,11 +16,13 @@ export async function runSetupTask(params: RunSetupTaskParams): Promise<string> 
     case "claude":
     case "claude-agent-sdk":
       return runClaudeSetupTask(params);
+    case "opencode":
+      return runOpenCodeSetupTask(params);
     case "pi":
       return runPiSetupTask(params);
     default:
       throw new Error(
-        `Agent "${params.agentType}" does not support automated setup. Use codex, claude, or pi.`,
+        `Agent "${params.agentType}" does not support automated setup. Use codex, claude, opencode, or pi.`,
       );
   }
 }

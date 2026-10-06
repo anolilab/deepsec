@@ -22,7 +22,12 @@ export function setSetupDocumentationWorkspace(workspaceDir: string): void {
 
 export function setupDocumentation(): SetupDocumentation | undefined {
   if (!setupDocumentationWorkspace) return undefined;
-  const packageRoot = path.join(setupDocumentationWorkspace, "node_modules", "deepsec");
+  const packageRoot = path.join(
+    setupDocumentationWorkspace,
+    "node_modules",
+    "@anolilab",
+    "deepsec",
+  );
   const docsDirectory = path.join(packageRoot, "dist", "docs");
   return {
     packageRoot,
@@ -33,7 +38,7 @@ export function setupDocumentation(): SetupDocumentation | undefined {
     models: path.join(docsDirectory, "models.md"),
     configuration: path.join(docsDirectory, "configuration.md"),
     faq: path.join(docsDirectory, "faq.md"),
-    note: "Read SKILL.md first, then the relevant file in dist/docs. These workspace paths become available after install; if they are missing, run npx deepsec init --help first.",
+    note: "Read SKILL.md first, then the relevant file in dist/docs. These workspace paths become available after install; if they are missing, run npx @anolilab/deepsec init --help first.",
   };
 }
 

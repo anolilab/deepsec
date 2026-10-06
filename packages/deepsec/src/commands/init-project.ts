@@ -198,8 +198,8 @@ still has placeholder sections.
 ## What to do
 
 1. **Read the deepsec skill.** After \`pnpm install\`, the file is at
-   \`node_modules/deepsec/SKILL.md\`. It maps every doc topic to a file
-   under \`node_modules/deepsec/dist/docs/\`. Read \`getting-started.md\`,
+   \`node_modules/@anolilab/deepsec/SKILL.md\`. It maps every doc topic to a file
+   under \`node_modules/@anolilab/deepsec/dist/docs/\`. Read \`getting-started.md\`,
    \`configuration.md\`, and \`writing-matchers.md\` (skim the rest).
 
 2. **Fill in \`data/${id}/INFO.md\`.** It's auto-injected into the AI
@@ -230,7 +230,7 @@ still has placeholder sections.
 
 3. **(Optional) Add custom matchers** for repo-specific patterns the
    built-in matchers won't catch. Read
-   \`node_modules/deepsec/dist/docs/writing-matchers.md\` first; the
+   \`node_modules/@anolilab/deepsec/dist/docs/writing-matchers.md\` first; the
    workflow there starts from a confirmed finding and grows the matcher
    from it. Don't add matchers speculatively — wait for a real TP.
 
@@ -295,7 +295,7 @@ export function initProjectCommand(opts: {
 
 function printAgentPrompt(id: string, targetRel: string): void {
   const lines = [
-    `Read node_modules/deepsec/SKILL.md to understand the tool. Then`,
+    `Read node_modules/@anolilab/deepsec/SKILL.md to understand the tool. Then`,
     `read data/${id}/SETUP.md and follow it: open ${targetRel}, skim`,
     `its README + AGENTS.md/CLAUDE.md + a handful of representative`,
     `code files, then replace each section of data/${id}/INFO.md.`,

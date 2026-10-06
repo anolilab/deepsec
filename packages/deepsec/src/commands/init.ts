@@ -364,7 +364,7 @@ export async function initCommand(opts: InitOpts) {
 
   console.log("Scaffold-only setup complete. Next:\n");
   if (wsRel !== ".") console.log(`  cd ${wsRel}`);
-  console.log(`  pnpm install                          ${DIM}# installs deepsec${RESET}`);
+  console.log(`  pnpm install                          ${DIM}# installs @anolilab/deepsec${RESET}`);
   console.log(
     `  ${DIM}# Set AI_GATEWAY_API_KEY in .env.local (or skip if claude/codex CLI is logged in)${RESET}`,
   );
@@ -385,7 +385,7 @@ export async function initCommand(opts: InitOpts) {
 
 function printAgentPrompt(id: string, targetRel: string): void {
   const lines = [
-    `Read node_modules/deepsec/SKILL.md to understand the tool. Then`,
+    `Read node_modules/@anolilab/deepsec/SKILL.md to understand the tool. Then`,
     `read data/${id}/SETUP.md and follow it: open ${targetRel}, skim`,
     `its README + AGENTS.md/CLAUDE.md + a handful of representative`,
     `code files, then replace each section of data/${id}/INFO.md.`,
@@ -439,7 +439,7 @@ function packageJson(name: string, deepsecDependency: string): string {
       // `.deepsec/` refuse to run. Setting it here stops the walk at the
       // workspace root.
       packageManager: detectPackageManager(),
-      dependencies: { deepsec: deepsecDependency },
+      dependencies: { "@anolilab/deepsec": deepsecDependency },
     },
     null,
     2,
@@ -492,7 +492,7 @@ function pnpmWorkspaceYaml(): string {
  * path called from `init`) appends new project entries above the marker.
  */
 function emptyConfigTs(): string {
-  return `import { defineConfig } from "deepsec/config";
+  return `import { defineConfig } from "@anolilab/deepsec/config";
 import { generatedMatchersPlugin } from "./generated-matchers.js";
 
 export default defineConfig({
@@ -505,7 +505,7 @@ export default defineConfig({
 }
 
 function generatedMatchersTs(): string {
-  return `import { compileDeclarativeMatchers, type DeepsecPlugin } from "deepsec/config";
+  return `import { compileDeclarativeMatchers, type DeepsecPlugin } from "@anolilab/deepsec/config";
 
 export const generatedMatchersPlugin: DeepsecPlugin = {
   name: "deepsec-generated-matchers",
@@ -517,7 +517,7 @@ export const generatedMatchersPlugin: DeepsecPlugin = {
 function readmeMd(id: string, targetRel: string): string {
   return `# deepsec
 
-This directory holds the [deepsec](https://www.npmjs.com/package/deepsec)
+This directory holds the [@anolilab/deepsec](https://www.npmjs.com/package/@anolilab/deepsec)
 config for the parent repo. Checked into git so teammates inherit
 project context (auth shape, threat model, custom matchers); generated
 scan output is gitignored.
@@ -526,7 +526,7 @@ Currently configured project: \`${id}\` (target: \`${targetRel}\`).
 
 ## Setup
 
-\`npx deepsec init\` created this workspace and normally completes its
+\`npx @anolilab/deepsec init\` created this workspace and normally completes its
 install, exact Vercel project link, Sandbox/model probes, threat model,
 coverage-guided scans, custom matchers, and first AI processing run.
 
@@ -587,8 +587,8 @@ AGENTS.md                Pointer for coding agents
 
 After \`pnpm install\`:
 
-- Skill: \`node_modules/deepsec/SKILL.md\`
-- Full docs: \`node_modules/deepsec/dist/docs/{getting-started,configuration,models,writing-matchers,plugins,architecture,data-layout,vercel-setup,faq}.md\`
+- Skill: \`node_modules/@anolilab/deepsec/SKILL.md\`
+- Full docs: \`node_modules/@anolilab/deepsec/dist/docs/{getting-started,configuration,models,writing-matchers,plugins,architecture,data-layout,vercel-setup,faq}.md\`
 
 Or browse on
 [GitHub](https://github.com/vercel/deepsec/tree/main/docs).
@@ -616,13 +616,13 @@ asked to set a project up.
   new project.
 - **Write a custom matcher** (only after a real true-positive shows you
   a pattern worth keeping): read
-  \`node_modules/deepsec/dist/docs/writing-matchers.md\`.
+  \`node_modules/@anolilab/deepsec/dist/docs/writing-matchers.md\`.
 
 ## Reference
 
-The deepsec skill is at \`node_modules/deepsec/SKILL.md\` (after
+The deepsec skill is at \`node_modules/@anolilab/deepsec/SKILL.md\` (after
 \`pnpm install\`). The full docs ship at
-\`node_modules/deepsec/dist/docs/\`.
+\`node_modules/@anolilab/deepsec/dist/docs/\`.
 `;
 }
 

@@ -8,7 +8,7 @@ description: "Review setup-generated declarative matchers and add richer project
 Normal initialization already asks whether custom matchers are needed:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 The setup agent inventories repository ingress surfaces, runs the built-in
@@ -96,7 +96,7 @@ Keep richer matchers beside the generated plugin:
 Register them through an additive inline plugin:
 
 ```ts
-import { defineConfig, type DeepsecPlugin } from "deepsec/config";
+import { defineConfig, type DeepsecPlugin } from "@anolilab/deepsec/config";
 import { generatedMatchersPlugin } from "./generated-matchers.js";
 import { myRouteNoAuth } from "./matchers/my-route-no-auth.js";
 import { myInternalRpc } from "./matchers/my-internal-rpc.js";
@@ -120,7 +120,7 @@ rather than relying on replacement order.
 ## Matcher shape
 
 ```ts
-import { regexMatcher, type MatcherPlugin } from "deepsec/config";
+import { regexMatcher, type MatcherPlugin } from "@anolilab/deepsec/config";
 
 export const myInternalRpc: MatcherPlugin = {
   slug: "my-internal-rpc",
@@ -157,8 +157,8 @@ Ask a coding agent to read:
 1. `.deepsec/data/<id>/setup/surface-inventory.json` for the intended surface;
 2. `.deepsec/generated-matchers.ts` for already-covered gaps;
 3. `.deepsec/data/<id>/files/` for candidate counts and revalidated findings;
-4. `.deepsec/node_modules/deepsec/dist/config.d.ts` for `MatcherPlugin`; and
-5. `.deepsec/node_modules/deepsec/dist/samples/webapp/` for richer examples.
+4. `.deepsec/node_modules/@anolilab/deepsec/dist/config.d.ts` for `MatcherPlugin`; and
+5. `.deepsec/node_modules/@anolilab/deepsec/dist/samples/webapp/` for richer examples.
 
 Require it to explain the missed surface, propose a bounded matcher, add
 examples, register the plugin without removing `generatedMatchersPlugin`, and

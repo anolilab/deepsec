@@ -5,7 +5,7 @@ description: "Understand the Vercel project link created by one-shot setup and c
 
 ## One project link, two capabilities
 
-`npx deepsec init` always connects the exact `.deepsec/` workspace to a
+`npx @anolilab/deepsec init` always connects the exact `.deepsec/` workspace to a
 Vercel project. That single link supplies the platform identity used for:
 
 - refreshing an OIDC credential for Vercel AI Gateway; and
@@ -26,7 +26,7 @@ a dedicated empty Deepsec project is the safest choice.
 Run from the repository you want to scan:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 If `.deepsec/.vercel/project.json` is absent, setup runs a pinned Vercel CLI,
@@ -62,7 +62,7 @@ export VERCEL_TOKEN=...
 export VERCEL_TEAM_ID=team_...
 export VERCEL_PROJECT_ID=prj_...
 
-npx deepsec init --headless
+npx @anolilab/deepsec init --headless
 ```
 
 Setup writes the non-secret team/project link locally and uses token values
@@ -83,14 +83,14 @@ values are never written to config or setup state.
 ### Vercel AI Gateway (default)
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 The linked project's OIDC credential is the default. You may instead provide
 a long-lived Gateway key:
 
 ```bash
-AI_GATEWAY_API_KEY=vck_... npx deepsec init
+AI_GATEWAY_API_KEY=vck_... npx @anolilab/deepsec init
 ```
 
 The route is stored as:
@@ -109,7 +109,7 @@ Name the environment variable that holds the key. The name is persisted; the
 value is not.
 
 ```bash
-MY_OPENAI_KEY=... npx deepsec init \
+MY_OPENAI_KEY=... npx @anolilab/deepsec init \
   --agent codex \
   --model-auth direct \
   --ai-provider openai \
@@ -119,7 +119,7 @@ MY_OPENAI_KEY=... npx deepsec init \
 Anthropic works the same way:
 
 ```bash
-MY_ANTHROPIC_KEY=... npx deepsec init \
+MY_ANTHROPIC_KEY=... npx @anolilab/deepsec init \
   --agent claude \
   --model-auth direct \
   --ai-provider anthropic \
@@ -143,7 +143,7 @@ Custom routes are supported by the Pi and OpenCode backends. Supply an HTTPS
 base URL and describe how the credential should be attached:
 
 ```bash
-MARTIAN_KEY=... npx deepsec init \
+MARTIAN_KEY=... npx @anolilab/deepsec init \
   --agent pi \
   --model openai/gpt-5.5 \
   --model-auth custom \
@@ -161,7 +161,7 @@ OpenCode uses `provider/model` identifiers, so the same custom route works
 there too:
 
 ```bash
-MARTIAN_KEY=... npx deepsec init \
+MARTIAN_KEY=... npx @anolilab/deepsec init \
   --agent opencode \
   --model openai/gpt-5.5 \
   --model-auth custom \

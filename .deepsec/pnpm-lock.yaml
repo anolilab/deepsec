@@ -4,7 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  deepsec:
-    specifier: link:../packages/deepsec
-    version: link:../packages/deepsec
+importers:
+
+  .:
+    dependencies:
+      '@anolilab/deepsec':
+        specifier: link:../packages/deepsec
+        version: link:../packages/deepsec

@@ -34,7 +34,7 @@ export interface DeepsecPlugin {
 Plugins are loaded from `deepsec.config.ts`:
 
 ```ts
-import { defineConfig } from "deepsec/config";
+import { defineConfig } from "@anolilab/deepsec/config";
 import myPlugin from "@my-org/deepsec-plugin";
 
 export default defineConfig({
@@ -59,8 +59,8 @@ Most common. Same shape as a built-in matcher; see
 
 ```ts
 // my-plugin/src/matchers/internal-rpc.ts
-import type { MatcherPlugin, CandidateMatch } from "deepsec/config";
-import { regexMatcher } from "deepsec/config";
+import type { MatcherPlugin, CandidateMatch } from "@anolilab/deepsec/config";
+import { regexMatcher } from "@anolilab/deepsec/config";
 
 export const internalRpcMatcher: MatcherPlugin = {
   slug: "internal-rpc-no-auth",
@@ -77,7 +77,7 @@ export const internalRpcMatcher: MatcherPlugin = {
 
 ```ts
 // my-plugin/src/index.ts
-import type { DeepsecPlugin } from "deepsec/config";
+import type { DeepsecPlugin } from "@anolilab/deepsec/config";
 import { internalRpcMatcher } from "./matchers/internal-rpc.js";
 
 export default function myPlugin(): DeepsecPlugin {
@@ -133,7 +133,7 @@ a soft-fail.
 A minimal ownership provider that reads from a CODEOWNERS file:
 
 ```ts
-import type { OwnershipProvider } from "deepsec/config";
+import type { OwnershipProvider } from "@anolilab/deepsec/config";
 import fs from "node:fs";
 
 export function codeownersProvider(rootPath: string): OwnershipProvider {
@@ -219,7 +219,7 @@ Drop-in pattern:
 ```ts
 // my-plugin/src/__tests__/plugin.test.ts
 import { describe, expect, it } from "vitest";
-import { createDefaultRegistry } from "deepsec/config";
+import { createDefaultRegistry } from "@anolilab/deepsec/config";
 import myPlugin from "../index.js";
 
 describe("@my-org/plugin-internal-services", () => {

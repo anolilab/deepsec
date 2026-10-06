@@ -26,7 +26,7 @@ Steady-state stages remain separate CLI subcommands and use the same on-disk
 representation.
 
 Install and auth have two levels of idempotency. Setup state avoids expensive
-work, while cheap probes still confirm `node_modules/deepsec` exists and
+work, while cheap probes still confirm `node_modules/@anolilab/deepsec` exists and
 rehydrate the configured model credential. The auth layer independently
 short-circuits fresh model and Sandbox probes when the exact project link,
 route, and agent set are unchanged.

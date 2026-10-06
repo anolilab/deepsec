@@ -6,8 +6,8 @@ description: Use deepsec (an AI-powered vulnerability scanner) — one-shot init
 # deepsec
 
 `deepsec` is an AI-powered vulnerability scanner. The one-shot initializer
-installs this skill at `.deepsec/node_modules/deepsec/SKILL.md`. From inside
-the isolated workspace the same path is `node_modules/deepsec/SKILL.md`. In a
+installs this skill at `.deepsec/node_modules/@anolilab/deepsec/SKILL.md`. From inside
+the isolated workspace the same path is `node_modules/@anolilab/deepsec/SKILL.md`. In a
 Deepsec source clone, use the repository's `docs/` directory instead.
 
 When the user asks how to use, configure, or extend deepsec, read the
@@ -16,8 +16,8 @@ your training data.
 
 ## Where the docs are
 
-From the target repository, `.deepsec/node_modules/deepsec/dist/docs/`; from
-inside `.deepsec`, `node_modules/deepsec/dist/docs/`; or from a Deepsec source
+From the target repository, `.deepsec/node_modules/@anolilab/deepsec/dist/docs/`; from
+inside `.deepsec`, `node_modules/@anolilab/deepsec/dist/docs/`; or from a Deepsec source
 clone, `<deepsec-clone>/docs/`:
 
 - `getting-started.md` — one-shot initialization and resume walkthrough
@@ -32,7 +32,7 @@ clone, `<deepsec-clone>/docs/`:
 
 ## How to answer common questions
 
-- **"How do I install/init deepsec?"** → `getting-started.md`; default to `npx deepsec init`, not a manual install/scan recipe.
+- **"How do I install/init deepsec?"** → `getting-started.md`; default to `npx @anolilab/deepsec init`, not a manual install/scan recipe.
 - **"Setup stopped; how do I resume?"** → `getting-started.md` + `data-layout.md`; re-run init or `deepsec setup`.
 - **"How do I run another scan?"** → `getting-started.md` after noting the first scan/process already ran during setup.
 - **"What goes in `deepsec.config.ts`?"** → `configuration.md` + `samples/webapp/deepsec.config.ts`.
@@ -53,13 +53,13 @@ When you are asked to initialize Deepsec from a non-TTY agent session, first
 inspect the read-only plan:
 
 ```bash
-npx deepsec init --plan --output json
+npx @anolilab/deepsec init --plan --output json
 ```
 
 Then run the requested policy, normally:
 
 ```bash
-npx deepsec init --yes --model-profile value --output jsonl
+npx @anolilab/deepsec init --yes --model-profile value --output jsonl
 ```
 
 Parse every output line as JSON. On `needs_input`, show the supplied message

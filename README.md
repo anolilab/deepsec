@@ -1,28 +1,53 @@
-# deepsec
+<div align="center">
 
-[`deepsec`](https://deepsec.sh) is an agent-powered vulnerability scanner that you can run in your own infrastructure, optimized to perform on-demand review of all code in existing 
-large-scale repos.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./.github/assets/deepsec-logo-dark.svg" />
+  <img src="./.github/assets/deepsec-logo.svg" width="120" alt="deepsec" />
+</picture>
 
-`deepsec` is designed to surface hard-to-find issues that have been lurking in applications for a long time. It is configured to use the best models at maximum thinking levels (tunable via `--thinking-level`, see [models](docs/models.md)), meaning scans can cost thousands or even tens-of-thousands of dollars for large codebases. Our customers have found the cost worth it for how quickly they were able to patch vulnerabilities that would have otherwise gone unfixed.
+**Agent-powered vulnerability scanning for large-scale codebases — on your own infrastructure.**
 
-For large codebases, work fans out across worker machines in parallel.
-If a run is interrupted or errors out partway through, just re-run the same
-command — deepsec picks up where it left off, skipping files it already
-analyzed and only investigating the rest.
+[**Quick start**](#quick-start) · [**Documentation**](#docs) · [**Models & agents**](docs/models.md) · [**Configuration**](docs/configuration.md)
 
-<p>
-  <a href="https://vercel.com/labs#labs-products"><img alt="Vercel Labs Product" src="https://img.shields.io/badge/LABS-PRODUCT-0a0a0a.svg?style=for-the-badge&amp;logo=Vercel&amp;labelColor=000000" height="28"></a>
-  <a href="https://www.npmjs.com/package/deepsec"><img alt="npm version: deepsec" src="https://img.shields.io/npm/v/deepsec.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
-  <a href="https://github.com/vercel-labs/deepsec/blob/main/LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/github/license/vercel-labs/deepsec.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
-  <a href="https://www.npmjs.com/package/deepsec"><img alt="npm downloads per month: deepsec" src="https://img.shields.io/npm/dm/deepsec.svg?style=for-the-badge&amp;labelColor=000000&amp;label=npm%20downloads" height="28"></a>
-</p>
+<br />
 
-## Get started
+[![typescript-image][typescript-badge]][typescript-url]
+[![Apache-2.0 licence][license-badge]][license]
+[![Node][node-badge]][node]
+[![pnpm][pnpm-badge]][pnpm]
+[![CI][ci-badge]][ci]
+[![npm version][npm-version-badge]][npm-version]
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
+[![OpenSSF Scorecard][scorecard-badge]][scorecard]
+
+</div>
+
+---
+
+<div align="center">
+    <p>
+        <sup>
+            Daniel Bannert's open source work is supported by the community on <a href="https://github.com/sponsors/prisis">GitHub Sponsors</a>
+        </sup>
+    </p>
+</div>
+
+---
+
+## What is deepsec?
+
+`deepsec` is an agent-powered vulnerability scanner that you run on your own infrastructure, optimized for on-demand review of all code in existing large-scale repos. It is designed to surface hard-to-find issues that have been lurking in applications for a long time.
+
+It is configured to use the best models at maximum thinking levels (tunable via `--thinking-level`, see [models](docs/models.md)), meaning scans can cost thousands or even tens-of-thousands of dollars for large codebases. Our customers have found the cost worth it for how quickly they were able to patch vulnerabilities that would have otherwise gone unfixed.
+
+For large codebases, work fans out across worker machines in parallel. If a run is interrupted or errors out partway through, just re-run the same command — deepsec picks up where it left off, skipping files it already analyzed and only investigating the rest.
+
+## Quick start
 
 From the root of the repository you want to scan:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 The command guides you through everything. It asks you to pick an AI model
@@ -33,11 +58,11 @@ review. The only thing it adds to your repository is a `.deepsec/` folder
 where all of its state and findings live.
 
 If the run is interrupted for any reason — Ctrl-C, lost connection, a
-spending limit — run `npx deepsec init` again and it continues where it
-left off. To cap what a run may spend or how long it may take:
+spending limit — run `npx @anolilab/deepsec init` again and it continues
+where it left off. To cap what a run may spend or how long it may take:
 
 ```bash
-npx deepsec init --max-cost-usd 100 --max-duration 2h
+npx @anolilab/deepsec init --max-cost-usd 100 --max-duration 2h
 ```
 
 When the scan finishes, get a readable report:
@@ -56,16 +81,16 @@ pnpm deepsec revalidate  # optional, cuts false-positive rate
 pnpm deepsec export --format md-dir --out ./findings
 ```
 
-The [getting started guide](docs/getting-started.md)
-covers all of this in more detail, including using your own OpenAI or
-Anthropic API key and running from CI or a coding agent.
+The [getting started guide](docs/getting-started.md) covers all of this in
+more detail, including using your own OpenAI or Anthropic API key and
+running from CI or a coding agent.
 
 ## Docs
 
 After initialization, agents can read the exact documentation matching the
-installed CLI at `.deepsec/node_modules/deepsec/SKILL.md` and
-`.deepsec/node_modules/deepsec/dist/docs/`. Setup errors expose these as
-absolute machine-readable paths.
+installed CLI at `.deepsec/node_modules/@anolilab/deepsec/SKILL.md` and
+`.deepsec/node_modules/@anolilab/deepsec/dist/docs/`. Setup errors expose
+these as absolute machine-readable paths.
 
 - [Getting started](docs/getting-started.md) — set up and run your first scan
 - [Reviewing changes](docs/reviewing-changes.md) — `process --diff` and CI gating
@@ -194,6 +219,31 @@ Running on a sandbox (see above) does limit the potential exposure substantially
 | `status`        | Snapshot of the project mirror                           |
 | `sandbox <cmd>` | Run any of the above on Vercel Sandbox microVMs          |
 
+## Contributing
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md). For security reports, see
+[SECURITY.md](SECURITY.md). For community guidelines, see
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+<!-- badges -->
+
+[typescript-badge]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
+[typescript-url]: https://www.typescriptlang.org/
+[license-badge]: https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=for-the-badge
+[license]: ./LICENSE
+[node-badge]: https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg?style=for-the-badge
+[node]: ./package.json
+[pnpm-badge]: https://img.shields.io/badge/pnpm-8.15.9-f69220.svg?style=for-the-badge
+[pnpm]: ./package.json
+[ci-badge]: https://img.shields.io/github/actions/workflow/status/anolilab/deepsec/ci.yml?branch=main&style=for-the-badge&label=CI
+[ci]: https://github.com/anolilab/deepsec/actions/workflows/ci.yml
+[npm-version-badge]: https://img.shields.io/npm/v/@anolilab%2Fdeepsec?color=cb3837&style=for-the-badge
+[npm-version]: https://www.npmjs.com/package/@anolilab/deepsec
+[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge
+[prs-welcome]: ./CONTRIBUTING.md
+[scorecard-badge]: https://api.scorecard.dev/projects/github.com/anolilab/deepsec/badge?style=for-the-badge
+[scorecard]: https://scorecard.dev/viewer/?uri=github.com/anolilab/deepsec

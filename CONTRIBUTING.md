@@ -14,7 +14,7 @@ packages/
   core/                Types, schemas, plugin contracts, config loader
   scanner/             Regex matchers + scanning engine
   processor/           AI agent integration (Claude SDK, Codex SDK), enrich, triage, revalidate
-  deepsec/              Publishable package: bundled CLI + the `deepsec/config` sub-export + the @vercel/sandbox executor
+  deepsec/              Publishable package: bundled CLI + the `@anolilab/deepsec/config` sub-export + the @vercel/sandbox executor
 e2e/                   End-to-end tests against a fixture project
 fixtures/
   vulnerable-app/      Intentionally vulnerable test data (excluded from lint/knip)
@@ -58,7 +58,7 @@ is required. Re-running the same command repairs workspaces created by older
 local bundles that pointed at the npm registry.
 
 All of build, test, lint, and knip must pass before a PR is mergeable.
-PRs that touch the publish surface (anything imported via `deepsec/config`)
+PRs that touch the publish surface (anything imported via `@anolilab/deepsec/config`)
 must also pass `pnpm test:bundle`.
 
 ### Live-sandbox e2e (manual)
@@ -111,7 +111,7 @@ full guide.
 The minimal shape:
 
 ```ts
-import type { DeepsecPlugin } from "deepsec/config";
+import type { DeepsecPlugin } from "@anolilab/deepsec/config";
 import { myMatcher } from "./matchers/my-matcher.js";
 
 export default function myPlugin(): DeepsecPlugin {

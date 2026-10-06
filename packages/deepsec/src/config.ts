@@ -2,7 +2,7 @@
  * Public SDK surface for `deepsec` configuration files and plugin authors.
  *
  * Users write:
- *   import { defineConfig } from "deepsec/config";
+ *   import { defineConfig } from "@anolilab/deepsec/config";
  *
  * Plugin authors writing matchers can also import `regexMatcher` and the
  * matcher-related types from here.
