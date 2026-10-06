@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildOpenCodeConfig,
+  buildOpenCodeV2Config,
   formatOpenCodeError,
+  openCodeServerEnv,
   parseOpenCodeModel,
+  protocolFromVersionOutput,
   resolveOpenCodeAssistantText,
   resolveOpenCodeVariant,
   shouldUseOpenCodeTextFormat,
@@ -185,5 +188,127 @@ describe("OpenCodeAgentPlugin configuration", () => {
       },
       headers: { "x-team": "security" },
     });
+  });
+});
+
+describe("OpenCode v2 support", () => {
+  const savedEnv = {
+    MARTIAN_API_KEY: process.env.MARTIAN_API_KEY,
+  };
+
+  afterEach(() => {
+    for (const [key, value] of Object.entries(savedEnv)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+
+  it("maps opencode --version output onto the runtime protocol", () => {
+    expect(protocolFromVersionOutput("opencode v2.0.24")).toBe("v2");
+    expect(protocolFromVersionOutput("opencode v2.1.0-alpha.3")).toBe("v2");
+    expect(protocolFromVersionOutput("1.18.35")).toBe("v1");
+    expect(protocolFromVersionOutput("opencode 1.18.35")).toBe("v1");
+    expect(protocolFromVersionOutput("")).toBe("v1");
+    expect(protocolFromVersionOutput("not-a-version")).toBe("v1");
+  });
+
+  it("builds a read-only v2 config with ordered permission rules", () => {
+    const config = buildOpenCodeV2Config({
+      model: "anthropic/claude-opus-4-8",
+      maxTurns: 42,
+    });
+
+    expect(config.share).toBe("disabled");
+    expect(config.update).toBe("disable");
+    expect(config.snapshots).toBe(false);
+    expect(config.model).toBe("anthropic/claude-opus-4-8");
+    expect(config.default_agent).toBe("deepsec");
+
+    const readOnly = [
+      { action: "*", resource: "*", effect: "deny" },
+      { action: "read", resource: "*", effect: "allow" },
+      { action: "glob", resource: "*", effect: "allow" },
+      { action: "grep", resource: "*", effect: "allow" },
+      { action: "list", resource: "*", effect: "allow" },
+    ];
+    expect(config.permissions).toEqual(readOnly);
+
+    const main = (config.agents as Record<string, any>)["deepsec"];
+    expect(main.mode).toBe("primary");
+    expect(main.steps).toBe(42);
+    expect(main.permissions).toEqual(readOnly);
+    expect(String(main.system)).toContain("static source inspection only");
+
+    const json = (config.agents as Record<string, any>)["deepsec-json"];
+    expect(json.hidden).toBe(true);
+    expect(json.steps).toBe(1);
+    expect(json.permissions).toEqual([{ action: "*", resource: "*", effect: "deny" }]);
+  });
+
+  it("remaps a custom provider override onto the standard provider env for v2", () => {
+    process.env.MARTIAN_API_KEY = "martian-secret";
+    const env = openCodeServerEnv(
+      {
+        model: "openai/gpt-5.5",
+        aiBaseUrl: "https://api.withmartian.com/v1",
+        aiApiKeyEnv: "MARTIAN_API_KEY",
+      },
+      "v2",
+    );
+    expect(env).toEqual({
+      OPENAI_API_KEY: "martian-secret",
+      OPENAI_BASE_URL: "https://api.withmartian.com/v1",
+    });
+
+    const anthropic = openCodeServerEnv(
+      {
+        model: "anthropic/claude-opus-4-8",
+        aiProvider: "anthropic",
+        aiBaseUrl: "https://proxy.example",
+        aiApiKeyEnv: "MARTIAN_API_KEY",
+      },
+      "v2",
+    );
+    expect(anthropic).toEqual({
+      ANTHROPIC_API_KEY: "martian-secret",
+      ANTHROPIC_BASE_URL: "https://proxy.example",
+    });
+  });
+
+  it("rejects custom provider headers on the v2 runtime", () => {
+    process.env.MARTIAN_API_KEY = "martian-secret";
+    expect(() =>
+      openCodeServerEnv(
+        {
+          model: "openai/gpt-5.5",
+          aiBaseUrl: "https://api.withmartian.com/v1",
+          aiApiKeyEnv: "MARTIAN_API_KEY",
+          aiHeaders: { "x-team": "security" },
+        },
+        "v2",
+      ),
+    ).toThrow(/--ai-header/);
+  });
+
+  it("passes no extra server env for v1 or uncustomized routes", () => {
+    expect(openCodeServerEnv({ model: "anthropic/claude-opus-4-8" }, "v1")).toEqual({});
+    expect(openCodeServerEnv({ model: "anthropic/claude-opus-4-8" }, "v2")).toEqual({});
+    expect(
+      openCodeServerEnv({ model: "openai/gpt-5.5", aiBaseUrl: "https://x.example" }, "v2"),
+    ).toEqual({});
+  });
+
+  it("requires the configured credential env for custom v2 routes", () => {
+    delete process.env.MARTIAN_API_KEY;
+    expect(() =>
+      openCodeServerEnv(
+        {
+          model: "openai/gpt-5.5",
+          aiBaseUrl: "https://api.withmartian.com/v1",
+          aiApiKeyEnv: "MARTIAN_API_KEY",
+        },
+        "v2",
+      ),
+    ).toThrow(/MARTIAN_API_KEY/);
   });
 });

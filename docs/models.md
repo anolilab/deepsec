@@ -185,12 +185,26 @@ repeatable `--ai-header name=value` remain available as Pi runtime overrides.
 
 ### OpenCode SDK harness
 
-OpenCode uses `@opencode-ai/sdk/v2` plus the `opencode-ai` runtime. Each
-batch starts a local OpenCode server, creates a session rooted at the target
-project, and requests JSON Schema output. The deepsec agent allows only
+OpenCode uses `@opencode-ai/sdk/v2` plus the `opencode` runtime — both the
+v1 runtime (npm `opencode-ai` 1.x, bundled for sandbox workers) and the
+**OpenCode v2** runtime (2.0.x) are supported; the generation is detected at
+startup and the matching protocol is used automatically. Each batch starts a
+private, password-secured local OpenCode server, creates a session rooted at
+the target project, and asks for JSON output. The deepsec agent allows only
 `read`, `glob`, `grep`, and `list`; shell, edits, network tools, subagents,
 external directories, LSP, skills, and MCP-triggered permissions are denied.
 The session and server are closed on success, error, or abort.
+
+Differences worth knowing:
+
+- The v1 runtime returns JSON Schema–validated structured output when the
+  model supports it; the v2 runtime has no structured-output prompts, so
+  results arrive as plain text and go through deepsec's shared JSON-repair
+  pipeline (same contract, same validation).
+- The v2 runtime always requires basic auth on its server; deepsec generates
+  the credential itself and nothing is written to disk.
+- `--ai-header` overrides require the v1 runtime; on v2 they are rejected
+  with a clear error.
 
 Models use OpenCode's required `provider/model` form:
 
@@ -204,7 +218,8 @@ For a local run without environment credentials, authenticate a provider in
 OpenCode first: run `opencode`, then use `/connect`. Sandbox runs cannot reuse
 that local credential store; use AI Gateway or an explicit provider token.
 Generic `--ai-provider`, `--ai-base-url`, `--ai-api-key-env`, and
-`--ai-header` overrides work for OpenCode as they do for Pi.
+`--ai-header` overrides work for OpenCode as they do for Pi (headers v1
+runtime only).
 
 ### `claude-sonnet-4-6` for `triage`
 
