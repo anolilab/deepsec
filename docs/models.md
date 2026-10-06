@@ -206,6 +206,24 @@ Differences worth knowing:
 - `--ai-header` overrides require the v1 runtime; on v2 they are rejected
   with a clear error.
 
+**Vercel AI Gateway on the v2 runtime** — two supported options:
+
+- Native gateway provider (recommended): the v2 model catalog ships a
+  `vercel` provider ("Vercel AI Gateway") that reads `AI_GATEWAY_API_KEY`
+  directly — one key covers every model behind the gateway:
+
+  ```bash
+  AI_GATEWAY_API_KEY=vck_… pnpm deepsec process --project-id my-app \
+    --agent opencode \
+    --model vercel/anthropic/claude-opus-4-8
+  ```
+
+- The standard `ANTHROPIC_*`/`OPENAI_*` expansion also keeps working:
+  deepsec translates the expansion into the v2 provider `baseURL` overlays
+  and bridges the gateway bearer token to the `x-api-key` form the v2
+  anthropic provider reads, so `--model anthropic/claude-opus-4-8` with
+  `AI_GATEWAY_API_KEY` routes through the gateway unchanged.
+
 Models use OpenCode's required `provider/model` form:
 
 ```bash

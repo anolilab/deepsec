@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   buildOpenCodeConfig,
   buildOpenCodeV2Config,
   formatOpenCodeError,
   openCodeServerEnv,
+  openCodeV2ProviderOverlays,
   parseOpenCodeModel,
   protocolFromVersionOutput,
   resolveOpenCodeAssistantText,
@@ -194,7 +195,18 @@ describe("OpenCodeAgentPlugin configuration", () => {
 describe("OpenCode v2 support", () => {
   const savedEnv = {
     MARTIAN_API_KEY: process.env.MARTIAN_API_KEY,
+    ANTHROPIC_AUTH_TOKEN: process.env.ANTHROPIC_AUTH_TOKEN,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    ANTHROPIC_BASE_URL: process.env.ANTHROPIC_BASE_URL,
+    OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
   };
+
+  beforeEach(() => {
+    delete process.env.ANTHROPIC_AUTH_TOKEN;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.ANTHROPIC_BASE_URL;
+    delete process.env.OPENAI_BASE_URL;
+  });
 
   afterEach(() => {
     for (const [key, value] of Object.entries(savedEnv)) {
@@ -296,6 +308,48 @@ describe("OpenCode v2 support", () => {
     expect(
       openCodeServerEnv({ model: "openai/gpt-5.5", aiBaseUrl: "https://x.example" }, "v2"),
     ).toEqual({});
+  });
+
+  it("bridges the gateway bearer token to the v2 anthropic env var", () => {
+    process.env.ANTHROPIC_AUTH_TOKEN = "vck_gateway_token";
+    process.env.ANTHROPIC_BASE_URL = "https://ai-gateway.vercel.sh";
+    const env = openCodeServerEnv({ model: "anthropic/claude-opus-4-8" }, "v2");
+    expect(env).toEqual({ ANTHROPIC_API_KEY: "vck_gateway_token" });
+
+    // An explicit API key wins — no bridge needed.
+    process.env.ANTHROPIC_API_KEY = "sk-ant-direct";
+    expect(openCodeServerEnv({ model: "anthropic/claude-opus-4-8" }, "v2")).toEqual({});
+  });
+
+  it("translates the gateway expansion into v2 provider baseURL overlays", () => {
+    process.env.ANTHROPIC_BASE_URL = "https://ai-gateway.vercel.sh";
+    process.env.OPENAI_BASE_URL = "https://ai-gateway.vercel.sh/v1";
+    const overlays = openCodeV2ProviderOverlays({ model: "anthropic/claude-opus-4-8" });
+    expect(overlays).toEqual({
+      anthropic: { settings: { baseURL: "https://ai-gateway.vercel.sh" } },
+      openai: { settings: { baseURL: "https://ai-gateway.vercel.sh/v1" } },
+    });
+    expect(openCodeServerEnv({ model: "anthropic/claude-opus-4-8" }, "v2")).toEqual({});
+  });
+
+  it("includes provider overlays in the v2 config content", () => {
+    process.env.ANTHROPIC_BASE_URL = "https://ai-gateway.vercel.sh";
+    const config = buildOpenCodeV2Config({ model: "anthropic/claude-opus-4-8" });
+    expect(config.providers).toEqual({
+      anthropic: { settings: { baseURL: "https://ai-gateway.vercel.sh" } },
+    });
+  });
+
+  it("redirects the model's own provider for custom v2 routes", () => {
+    const overlays = openCodeV2ProviderOverlays({
+      model: "openai/gpt-5.5",
+      aiProvider: "martian",
+      aiBaseUrl: "https://api.withmartian.com/v1",
+      aiApiKeyEnv: "MARTIAN_API_KEY",
+    });
+    expect(overlays).toEqual({
+      openai: { settings: { baseURL: "https://api.withmartian.com/v1" } },
+    });
   });
 
   it("requires the configured credential env for custom v2 routes", () => {

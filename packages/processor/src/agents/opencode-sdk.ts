@@ -399,6 +399,7 @@ export function buildOpenCodeV2Config(config: Record<string, unknown>): Record<s
   const providerID = cfg.aiProvider ?? requested.providerID;
   const model = `${providerID}/${requested.modelID}`;
   const maxTurns = cfg.maxTurns ?? DEFAULT_MAX_TURNS;
+  const providerOverlays = openCodeV2ProviderOverlays(cfg);
 
   return {
     share: "disabled",
@@ -407,6 +408,7 @@ export function buildOpenCodeV2Config(config: Record<string, unknown>): Record<s
     model,
     default_agent: MAIN_AGENT,
     permissions: V2_READ_ONLY_PERMISSIONS,
+    ...(Object.keys(providerOverlays).length > 0 ? { providers: providerOverlays } : {}),
     agents: {
       [MAIN_AGENT]: {
         description: "Read-only static security analysis for deepsec",
@@ -428,6 +430,37 @@ export function buildOpenCodeV2Config(config: Record<string, unknown>): Record<s
 }
 
 /**
+ * v2 provider config overlays (baseURL redirects). The v2 built-in
+ * anthropic and openai providers take their base URL from config, not from
+ * the ANTHROPIC_BASE_URL / OPENAI_BASE_URL env vars deepsec's Gateway
+ * expansion sets — so the expansion is translated into the matching
+ * `providers.<id>.settings.baseURL` overlay, and a custom provider route
+ * (--ai-base-url) redirects the model's own provider the same way.
+ */
+export function openCodeV2ProviderOverlays(
+  cfg: OpenCodeAgentConfig,
+): Record<string, { settings: { baseURL: string } }> {
+  const requested = parseOpenCodeModel(cfg.model ?? DEFAULT_MODEL);
+  const overlays: Record<string, { settings: { baseURL: string } }> = {};
+
+  if (cfg.aiBaseUrl) {
+    // Custom route: redirect the model's own provider at the custom gateway.
+    overlays[requested.providerID] = { settings: { baseURL: cfg.aiBaseUrl } };
+    return overlays;
+  }
+
+  const anthropicBase = process.env.ANTHROPIC_BASE_URL;
+  if (anthropicBase) {
+    overlays.anthropic = { settings: { baseURL: anthropicBase } };
+  }
+  const openaiBase = process.env.OPENAI_BASE_URL;
+  if (openaiBase) {
+    overlays.openai = { settings: { baseURL: openaiBase } };
+  }
+  return overlays;
+}
+
+/**
  * Resolve extra environment variables the spawned OpenCode server should
  * receive. v2's built-in providers read their credentials from the ambient
  * environment (ANTHROPIC_ and OPENAI_ variables), so gateway and direct
@@ -439,7 +472,21 @@ export function openCodeServerEnv(
   cfg: OpenCodeAgentConfig,
   protocol: OpenCodeProtocol,
 ): NodeJS.ProcessEnv {
-  if (protocol !== "v2" || !cfg.aiBaseUrl || !cfg.aiApiKeyEnv) return {};
+  if (protocol !== "v2") return {};
+  if (!cfg.aiBaseUrl || !cfg.aiApiKeyEnv) {
+    // Gateway route: deepsec's startup expansion sets ANTHROPIC_AUTH_TOKEN
+    // (bearer) plus ANTHROPIC_BASE_URL. The v2 anthropic provider only reads
+    // ANTHROPIC_API_KEY (x-api-key) from the environment, so bridge the
+    // gateway token across when the API-key form is absent.
+    if (
+      process.env.ANTHROPIC_BASE_URL &&
+      !process.env.ANTHROPIC_API_KEY &&
+      process.env.ANTHROPIC_AUTH_TOKEN
+    ) {
+      return { ANTHROPIC_API_KEY: process.env.ANTHROPIC_AUTH_TOKEN };
+    }
+    return {};
+  }
   const credential = process.env[cfg.aiApiKeyEnv];
   if (!credential) {
     throw new Error(
