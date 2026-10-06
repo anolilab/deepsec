@@ -12,6 +12,7 @@ import {
 } from "@opencode-ai/sdk/v2";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import {
+  AgentPolicyRefusalError,
   backoff,
   buildInvestigateJsonRepairPrompt,
   buildInvestigatePrompt,
@@ -22,11 +23,13 @@ import {
   isTransientError,
   jsonRepairFailureError,
   MAX_ATTEMPTS,
+  type ParsedInvestigateResults,
   parseInvestigateResults,
   parseRefusalReport,
   parseRevalidateVerdicts,
   QuotaExhaustedError,
   REFUSAL_FOLLOWUP_PROMPT,
+  runInvestigateFieldRepairLoop,
   writeParseFailureDebug,
 } from "./shared.js";
 import type {
@@ -778,10 +781,21 @@ export class OpenCodeAgentPlugin implements AgentPlugin {
         );
       }
 
-      let results: InvestigateResult[];
+      let parsedOutcome: ParsedInvestigateResults;
       try {
-        results = parseInvestigateResults(resultText, batch);
+        parsedOutcome = parseInvestigateResults(resultText, batch);
       } catch (err) {
+        if (err instanceof AgentPolicyRefusalError) {
+          writeParseFailureDebug({
+            projectId,
+            phase: "investigate",
+            agentType: this.type,
+            resultText,
+            error: err,
+            batch,
+          });
+          throw err;
+        }
         yield {
           type: "thinking",
           message: "OpenCode returned non-JSON investigation output; requesting JSON-only repair",
@@ -803,7 +817,7 @@ export class OpenCodeAgentPlugin implements AgentPlugin {
           throw err;
         }
         try {
-          results = parseInvestigateResults(repairText, batch);
+          parsedOutcome = parseInvestigateResults(repairText, batch);
           resultText = repairText;
           yield { type: "thinking", message: "OpenCode JSON repair succeeded" };
         } catch (repairErr) {
@@ -818,6 +832,19 @@ export class OpenCodeAgentPlugin implements AgentPlugin {
           });
           throw combinedError;
         }
+      }
+      let results: InvestigateResult[] = parsedOutcome.results;
+      if (parsedOutcome.invalid.length > 0) {
+        const fieldRepair = yield* runInvestigateFieldRepairLoop({
+          results,
+          invalid: parsedOutcome.invalid,
+          batch,
+          followUp: (prompt) => runToollessFollowUp({ context, prompt, config }),
+          agentLabel: "OpenCode",
+          agentType: this.type,
+          projectId,
+        });
+        results = fieldRepair.results;
       }
 
       const refusal = await runRefusalFollowUp({ context, config });

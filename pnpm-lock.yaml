@@ -58,8 +58,8 @@ importers:
         specifier: ^0.156.1
         version: 0.156.1
       '@opencode-ai/sdk':
-        specifier: ^1.18.3
-        version: 1.18.3
+        specifier: ^1.18.35
+        version: 1.18.35
       '@vercel/oidc':
         specifier: ^3.4.0
         version: 3.4.0
@@ -76,8 +76,8 @@ importers:
         specifier: ^10.0.0
         version: 10.2.5
       opencode-ai:
-        specifier: ^1.18.3
-        version: 1.18.3
+        specifier: ^1.18.35
+        version: 1.18.35
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -134,8 +134,8 @@ importers:
         specifier: ^0.156.1
         version: 0.156.1
       '@opencode-ai/sdk':
-        specifier: ^1.18.3
-        version: 1.18.3
+        specifier: ^1.18.35
+        version: 1.18.35
       jsonrepair:
         specifier: ^3.14.0
         version: 3.14.0
@@ -2460,8 +2460,8 @@ packages:
     dev: false
     optional: true
 
-  /@opencode-ai/sdk@1.18.3:
-    resolution: {integrity: sha512-Mevo4e6kQwbvto9E+42KSIVMhp+JBu+SwQhC5AomAvrV6Xkio3U249T+xDILDCXhl5Z/Hi/DlAuVLzpGnuh0gg==}
+  /@opencode-ai/sdk@1.18.35:
+    resolution: {integrity: sha512-cp3IFKwnqgeUbflrrwz/WmG/dALVyM2k0LA1aqCvWe58Tu4utNTNw+BwZzQEML1HxDaLrIB+Fc4Ztb8S16Ijcw==}
     dependencies:
       cross-spawn: 7.0.6
     dev: false
@@ -11154,117 +11154,117 @@ packages:
       zod: 4.4.3
     dev: false
 
-  /opencode-ai@1.18.3:
-    resolution: {integrity: sha512-HnItl/+uhSpj7JV9x6ITiE0XFq4b/PKF5OM03TIyiFoFiLw3MQoJOAXZFTEzC7IOgAIYcysRQBBmCmlXILkxww==}
+  /opencode-ai@1.18.35:
+    resolution: {integrity: sha512-tDQKThIZ3amp8NSn3XDP2Dj5BlhRbZC0VkIxgYuf6gvRSXkseqD31j/U4KfpPwha593i8M59hdsDfz32yJx4Og==}
     cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      opencode-darwin-arm64: 1.18.3
-      opencode-darwin-x64: 1.18.3
-      opencode-darwin-x64-baseline: 1.18.3
-      opencode-linux-arm64: 1.18.3
-      opencode-linux-arm64-musl: 1.18.3
-      opencode-linux-x64: 1.18.3
-      opencode-linux-x64-baseline: 1.18.3
-      opencode-linux-x64-baseline-musl: 1.18.3
-      opencode-linux-x64-musl: 1.18.3
-      opencode-windows-arm64: 1.18.3
-      opencode-windows-x64: 1.18.3
-      opencode-windows-x64-baseline: 1.18.3
+      opencode-darwin-arm64: 1.18.35
+      opencode-darwin-x64: 1.18.35
+      opencode-darwin-x64-baseline: 1.18.35
+      opencode-linux-arm64: 1.18.35
+      opencode-linux-arm64-musl: 1.18.35
+      opencode-linux-x64: 1.18.35
+      opencode-linux-x64-baseline: 1.18.35
+      opencode-linux-x64-baseline-musl: 1.18.35
+      opencode-linux-x64-musl: 1.18.35
+      opencode-windows-arm64: 1.18.35
+      opencode-windows-x64: 1.18.35
+      opencode-windows-x64-baseline: 1.18.35
     dev: false
 
-  /opencode-darwin-arm64@1.18.3:
-    resolution: {integrity: sha512-BkfJf4E502OVwpDXgaVz8eqTDOy2B9xXPefYebT+xv8TXYvEo1wtby4eu4MoN51o4o1qpzcvCCXDqUDXu1pBGQ==}
+  /opencode-darwin-arm64@1.18.35:
+    resolution: {integrity: sha512-WlM5yNbT6OppyXBaTgnri0tnsi/axeLl16vlIrfIdjm4yEvuZVD0JBpBNOLBI21jig0Rw7/HRAO0XWokgJge9g==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-darwin-x64-baseline@1.18.3:
-    resolution: {integrity: sha512-8qQ9Ig7Zp7LEKaKGRL+OIlDb/uTLYkeAq6SGsN0fLHR2rHZRHyb61KrpkS5TgUlGwSWPtb5uCeVtTA9rGbEAKw==}
+  /opencode-darwin-x64-baseline@1.18.35:
+    resolution: {integrity: sha512-Fk6bhyYZ2M8H10hx0/5FUkomLyl4tYN1pJl4Y6tAy8vnO4rSve90QPup6ngXPIYvCbB2JbaDKsgl2Q8cJnBxeA==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-darwin-x64@1.18.3:
-    resolution: {integrity: sha512-ujy61O3WUEHjPqk+qXMBl97zR9q3crOzHbm2VLmXLHUWbqB5ZtN1HToODbuI1SBMKVR8GyZwPygRQVMfON4DHg==}
+  /opencode-darwin-x64@1.18.35:
+    resolution: {integrity: sha512-beywtZN8juHfH3BzJ79/v0MigR5XszjXkIH8IG+uMFRKdqzYHpZN7Wm5uTj3zTxnx4D95XYSV6ICkiTsU829zQ==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-arm64-musl@1.18.3:
-    resolution: {integrity: sha512-s1vNP8dpIH3vFs8aoMzgHViBNVz6xtR7n24gGg0WOw4uSZVM+sRUmZKc3Hj56XjHQSsVBg5AkwR2Xm0nFSfIUQ==}
+  /opencode-linux-arm64-musl@1.18.35:
+    resolution: {integrity: sha512-f3uFZXwXPYHx8frgDzBTFFQmzVjm50Yg5gOSScPoXTgURZRfeU2zgV5iCvBhUSjlA0wvpZtBswUqwN9Kd4n8bw==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-arm64@1.18.3:
-    resolution: {integrity: sha512-K+1SPkfrYFUufPUYpbSurlB2ogpjv5in2usA1FwOM7HCOpNxR3ap7K+X4uQXnOV8AtsON+Vr9W5uYXQJA1yKlA==}
+  /opencode-linux-arm64@1.18.35:
+    resolution: {integrity: sha512-5IgrvyoxQc3altzqsGPM5Aigf/uzC/pMFG2Kt4w8vJEtJKKem4Hl9wEVmsZxMYFZDzyx7e0MuBkOAzt6AD++1A==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-x64-baseline-musl@1.18.3:
-    resolution: {integrity: sha512-F2nNPqYPdTCydLvNH1rvSXdlX3pfmOmOOfsFl+pqi3W0iE3Alyxmv28AjrIGUw4/6EfWhMKYcyxKjNIKLFyaZQ==}
+  /opencode-linux-x64-baseline-musl@1.18.35:
+    resolution: {integrity: sha512-JtiM7KiF7Tf/aZKfPYy0dOom2Ty1ZxnFp1mUJzUuNXQHeCJAwLcaxC39OxtRbu7cCTmIV2pI5m+bVizxW1vE8w==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-x64-baseline@1.18.3:
-    resolution: {integrity: sha512-DDfspGSQ123yhsFhAlbpF+tsvje5kHOS2/PYUpWJroTlvgtqRLGmET51Anrxd5BrAFrqB6PXYA2kGh5QStPU/g==}
+  /opencode-linux-x64-baseline@1.18.35:
+    resolution: {integrity: sha512-M4SO/A3i2pfOxwBl2C4w6ZgjUx1CH0Y1+yIrc2OdagH3ZOYuhCiFR2FVxhOwMxA/CxlMrS3Z6xxY8WSZCGfuYw==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-x64-musl@1.18.3:
-    resolution: {integrity: sha512-SSp2zSpAM4dntcPZw8ISl3CmXYrWPftLc8u0HuAIeNWJOo6G4xAHPoXhNnXI3tQYqqGcppArf/3EMPnF9WnyFw==}
+  /opencode-linux-x64-musl@1.18.35:
+    resolution: {integrity: sha512-RN7vMSmb/Z0ibxRxZXW3oi7MhNTarS/jHXG2YwHkpC1DSDfur5f/K6UjajRdtgiBEv3W8A7bEej+2cRvXAG95w==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-linux-x64@1.18.3:
-    resolution: {integrity: sha512-p+19dSTf3pWL3+Rh/Ym94DvS9mNxNG94HJnR5oMCDhQvgimdT5tSdoK4ETtk4XOoCKz3OcTQDPHTdYKcJg32KQ==}
+  /opencode-linux-x64@1.18.35:
+    resolution: {integrity: sha512-xs/DPt8bK6NTWHpOlVJDWC/P3BnAuAQFHwa+mjrbxhDGd0Pi/GGWGjh4Sr4cpv6KwvfUKVoLKfHc/J8Nnz0XMg==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-windows-arm64@1.18.3:
-    resolution: {integrity: sha512-qkz9/r6kUhhgLycQv71MoSQ2m5UI2QnZZx8SeZgyYD7oB8pDH6DIGbDWcs6BJ02ND1Y5hmgYWlP+rOrMkGlMJw==}
+  /opencode-windows-arm64@1.18.35:
+    resolution: {integrity: sha512-zPTMxYzUP+7rsiZWE2ejPOJLgp4+IyUUXvr5vh/ufx1v5Pq05sPy4hvS1uZJFS/KxFQ09MAiEJ2LKUJ7CHCGig==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-windows-x64-baseline@1.18.3:
-    resolution: {integrity: sha512-+tyoxwSfY7msfZNY1IoA0ZWRL9XfdqY+ash6U3ldfE+GfF2WNAdhewmmYiUsC4lHjkdSmLt2brdWgoebQK9HAg==}
+  /opencode-windows-x64-baseline@1.18.35:
+    resolution: {integrity: sha512-L4gD+osKK5YRY1ZDdH87dzvG5MAUpXci4CgBrJ5+GCxJnrBa+7sJqpgSHZPQBNRRPuT0nPqM3uasfFPEzkLSmQ==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: false
     optional: true
 
-  /opencode-windows-x64@1.18.3:
-    resolution: {integrity: sha512-V/Q4VkyZ7TkotLbpTCX/s5wP8MoFj5UnRqBHFJ8WGptb/+oYw36kamUUt1P1wN8iRjmw+8vwYhuYdAe+3xbgpQ==}
+  /opencode-windows-x64@1.18.35:
+    resolution: {integrity: sha512-KFFt0MPMoKsniQ9NO0HqVIYM7ZoVwKNT+xg6oNOk0qRgPk2sAHCDcKZCnAuzVmdEzG7MJfDdkav9kjVCZce6sQ==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
