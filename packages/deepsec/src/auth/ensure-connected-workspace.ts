@@ -79,7 +79,7 @@ function fresh(at: string, now: Date, ttl: number): boolean {
 
 function canReuseModel(
   previous: ConnectionVerificationCheckpoint | undefined,
-  platform: PlatformLinkResult,
+  platform: PlatformLinkResult | undefined,
   route: ModelRoute,
   agents: string[],
   now: Date,
@@ -87,8 +87,8 @@ function canReuseModel(
 ): boolean {
   return Boolean(
     previous &&
-      previous.project?.teamId === platform.project.teamId &&
-      previous.project?.projectId === platform.project.projectId &&
+      previous.project?.teamId === platform?.project.teamId &&
+      previous.project?.projectId === platform?.project.projectId &&
       sameRoute(previous.route, route) &&
       JSON.stringify(previous.agentTypes) === JSON.stringify(agents) &&
       fresh(previous.modelVerifiedAt, now, ttl),
@@ -127,19 +127,58 @@ export async function ensureConnectedWorkspace(
     };
   }
 
-  const platform = await (deps.ensureLink ?? ensureVercelLink)({
-    workspaceDir: options.workspaceDir,
-    interactive: options.interactive,
-    env,
-    teamId: options.teamId,
-    projectId: options.projectId,
-    allowCreate: options.allowCreate,
-    projectName: options.projectName,
-    runCli: options.runCli,
-    onLog: options.onLog,
-  });
+  let platform: PlatformLinkResult | undefined;
+  if (options.modelRoute.mode === "direct" || options.modelRoute.mode === "custom") {
+    // Direct and custom routes bring their own provider credential, so the
+    // Vercel platform link is not required for model access — it only
+    // enables the optional Vercel Sandbox distribution. Link silently when
+    // credentials already exist, but never prompt for a Vercel login the
+    // selected route does not need (#164).
+    try {
+      platform = await (deps.ensureLink ?? ensureVercelLink)({
+        workspaceDir: options.workspaceDir,
+        interactive: false,
+        env,
+        teamId: options.teamId,
+        projectId: options.projectId,
+        allowCreate: options.allowCreate,
+        projectName: options.projectName,
+        runCli: options.runCli,
+        onLog: options.onLog,
+      });
+    } catch (error) {
+      if (
+        !(
+          error instanceof Error &&
+          "code" in error &&
+          (error as { code?: string }).code === "VERCEL_AUTH_REQUIRED"
+        )
+      ) {
+        throw error;
+      }
+      platform = undefined;
+    }
+    if (!platform) {
+      options.onLog?.(
+        "No Vercel project link and no Vercel credentials found — continuing with the selected provider credential. " +
+          "Vercel Sandbox distribution stays unavailable until `deepsec setup` links a project.",
+      );
+    }
+  } else {
+    platform = await (deps.ensureLink ?? ensureVercelLink)({
+      workspaceDir: options.workspaceDir,
+      interactive: options.interactive,
+      env,
+      teamId: options.teamId,
+      projectId: options.projectId,
+      allowCreate: options.allowCreate,
+      projectName: options.projectName,
+      runCli: options.runCli,
+      onLog: options.onLog,
+    });
+  }
 
-  if (options.interactive && env.VERCEL_OIDC_TOKEN) {
+  if (platform && options.interactive && env.VERCEL_OIDC_TOKEN) {
     const refreshed = await (deps.refreshOidcToken ?? getVercelOidcToken)({
       expirationBufferMs: 60 * 60 * 1000,
       team: platform.project.teamId,
@@ -154,15 +193,17 @@ export async function ensureConnectedWorkspace(
   }
 
   // Link success is not enough: the credential must still be available now.
-  assertSandboxCredential({ env });
+  // Skipped when no platform link exists — direct/custom routes without one
+  // legitimately carry no Vercel credential.
+  if (platform) assertSandboxCredential({ env });
 
   const resolvedRoutes: ResolvedModelRoute[] = [];
   for (const agentType of options.agentTypes) {
     const resolved = await (deps.resolveRoute ?? resolveModelRoute)(options.modelRoute, {
       agentType,
       env,
-      vercelTeam: platform.project.teamId,
-      vercelProject: platform.project.projectId,
+      vercelTeam: platform?.project.teamId,
+      vercelProject: platform?.project.projectId,
     });
     resolvedRoutes.push(resolved);
     applyResolvedModelRoute(resolved, env);
@@ -185,19 +226,18 @@ export async function ensureConnectedWorkspace(
   const modelVerifiedAt = reuseModel ? options.previous!.modelVerifiedAt : now.toISOString();
   const normalizedRoute = resolvedRoutes[0].route;
   const verification: ConnectionVerificationCheckpoint = {
-    project: platform.project,
+    ...(platform ? { project: platform.project } : {}),
     route: normalizedRoute,
     agentTypes: [...options.agentTypes],
     modelVerifiedAt,
   };
 
   return {
-    platformAuth: { method: platform.method },
-    project: platform.project,
+    ...(platform ? { platformAuth: { method: platform.method }, project: platform.project } : {}),
     modelAuth: normalizedRoute,
     agentTypes: [...options.agentTypes],
     modelRouteVerified: true,
-    sandboxReady: true,
+    sandboxReady: Boolean(platform),
     verification,
   };
 }

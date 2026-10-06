@@ -16,12 +16,14 @@ import {
   readProjectConfig,
   readRunMeta,
   registerActiveRun,
+  SEVERITY_ORDER,
   writeFileRecord,
   writeRunMeta,
 } from "@deepsec/core";
 import { noiseScore, readTechJson } from "@deepsec/scanner";
 import { ClaudeAgentSdkPlugin } from "./agents/claude-agent-sdk.js";
 import { CodexAgentSdkPlugin } from "./agents/codex-sdk.js";
+import { OpenCodeAgentPlugin } from "./agents/opencode-sdk.js";
 import { PiAgentPlugin } from "./agents/pi-sdk.js";
 import { AgentRegistry } from "./agents/registry.js";
 import { QuotaExhaustedError, type QuotaSource } from "./agents/shared.js";
@@ -45,6 +47,7 @@ import {
 
 export { ClaudeAgentSdkPlugin } from "./agents/claude-agent-sdk.js";
 export { CodexAgentSdkPlugin } from "./agents/codex-sdk.js";
+export { OpenCodeAgentPlugin } from "./agents/opencode-sdk.js";
 export { PiAgentPlugin } from "./agents/pi-sdk.js";
 export { AgentRegistry } from "./agents/registry.js";
 export {
@@ -89,6 +92,7 @@ export function createDefaultAgentRegistry(): AgentRegistry {
   const registry = new AgentRegistry();
   registry.register(new ClaudeAgentSdkPlugin());
   registry.register(new CodexAgentSdkPlugin());
+  registry.register(new OpenCodeAgentPlugin());
   registry.register(new PiAgentPlugin());
   // Plugins can contribute additional backends via `agents: []` in their
   // DeepsecPlugin export. The shape is validated by AgentRegistry at use.
@@ -872,15 +876,6 @@ export async function process(params: {
 }
 
 // --- Revalidation ---
-
-const SEVERITY_ORDER: Record<Severity, number> = {
-  CRITICAL: 0,
-  HIGH: 1,
-  MEDIUM: 2,
-  HIGH_BUG: 3,
-  BUG: 4,
-  LOW: 5,
-};
 
 export async function revalidate(params: {
   projectId: string;

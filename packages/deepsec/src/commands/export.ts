@@ -1,19 +1,10 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import type { FileRecord, Finding, Severity } from "@deepsec/core";
-import { dataDir, getDataRoot, loadAllFileRecords } from "@deepsec/core";
+import type { FileRecord, Finding, Severity, Triage } from "@deepsec/core";
+import { dataDir, getDataRoot, loadAllFileRecords, SEVERITY_ORDER } from "@deepsec/core";
 import { BOLD, DIM, GREEN, RESET, YELLOW } from "../formatters.js";
 import { resolveAgentType } from "../resolve-agent-type.js";
-
-const SEVERITY_ORDER: Record<Severity, number> = {
-  CRITICAL: 0,
-  HIGH: 1,
-  HIGH_BUG: 2,
-  MEDIUM: 3,
-  BUG: 4,
-  LOW: 5,
-};
 
 interface OwnerSummary {
   assignee?: string;
@@ -45,6 +36,7 @@ interface ExportedFinding {
       verdict: string;
       reasoning: string;
     };
+    triage?: Triage;
     githubUrl?: string;
     owners: OwnerSummary;
   };
@@ -165,6 +157,19 @@ function buildDescription(
     if (owners.managers.length > 0) {
       parts.push("", "**Managers:**", ...owners.managers.slice(0, 3).map((m) => `- <${m.email}>`));
     }
+  }
+
+  if (finding.triage) {
+    parts.push(
+      "",
+      "## Triage",
+      "",
+      `**Priority:** ${finding.triage.priority}  •  **Exploitability:** ${finding.triage.exploitability}  •  **Impact:** ${finding.triage.impact}`,
+      "",
+      finding.triage.reasoning,
+      "",
+      `_Triaged ${finding.triage.triagedAt} by ${finding.triage.model}._`,
+    );
   }
 
   parts.push(
@@ -512,6 +517,7 @@ export async function exportCommand(opts: {
             revalidation: finding.revalidation
               ? { verdict: finding.revalidation.verdict, reasoning: finding.revalidation.reasoning }
               : undefined,
+            triage: finding.triage,
             githubUrl,
             owners,
           },

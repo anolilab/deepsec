@@ -93,6 +93,11 @@ your key, never the key itself. See
 [project link and credentials](https://github.com/vercel-labs/deepsec/blob/main/docs/vercel-setup.md)
 for the full reference.
 
+When running locally, `deepsec` can also reuse existing Claude, Codex, Pi, or
+OpenCode provider authentication — including a local `opencode` CLI login
+(`opencode` → `/connect`) — for evaluation-scale scans.
+
+
 If a `process` or `revalidate` run halts because the upstream credential
 ran out of quota or credits, deepsec stops gracefully and tells you
 where to top up. Re-run the same command afterward and it picks up

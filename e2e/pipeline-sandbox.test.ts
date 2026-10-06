@@ -64,6 +64,7 @@ const HAS_SANDBOX_KEY =
     Boolean(process.env.VERCEL_PROJECT_ID));
 
 const SHOULD_RUN = LIVE && HAS_SANDBOX_KEY;
+const SANDBOX_TIMEOUT_MS = 30 * 60_000;
 
 /**
  * Stub agent definition shared with pipeline.test.ts. Inlined here
@@ -319,6 +320,8 @@ describe.skipIf(!SHOULD_RUN)("pipeline e2e — live sandbox", () => {
             "1",
             "--vcpus",
             "2",
+            "--timeout",
+            String(SANDBOX_TIMEOUT_MS),
             "--limit",
             "2",
             "--concurrency",
@@ -358,6 +361,8 @@ describe.skipIf(!SHOULD_RUN)("pipeline e2e — live sandbox", () => {
             "1",
             "--vcpus",
             "2",
+            "--timeout",
+            String(SANDBOX_TIMEOUT_MS),
             "--limit",
             "2",
             "--concurrency",

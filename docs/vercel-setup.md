@@ -100,7 +100,7 @@ ai: { mode: "gateway", provider: "vercel" }
 ```
 
 Deepsec maps the Gateway credential to the environment expected by Codex,
-Claude, or Pi. Sandbox workers receive only a placeholder. The real bearer
+Claude, OpenCode, or Pi. One key covers all four harnesses. Sandbox workers receive only a placeholder. The real bearer
 token is injected at the allowed Gateway host by the host-side broker.
 
 ### Your own OpenAI or Anthropic credential
@@ -133,13 +133,14 @@ again or put it in `.deepsec/.env.local`:
 MY_OPENAI_KEY=...
 ```
 
-Direct OpenAI routes require Codex; direct Anthropic routes require Claude.
+Direct OpenAI routes require Codex or OpenCode (`openai/...` models); direct
+Anthropic routes require Claude or OpenCode (`anthropic/...` models).
 Setup rejects incompatible agent/provider combinations before scanning.
 
 ### Custom HTTPS provider
 
-Custom routes are supported by the Pi backend. Supply an HTTPS base URL and
-describe how the credential should be attached:
+Custom routes are supported by the Pi and OpenCode backends. Supply an HTTPS
+base URL and describe how the credential should be attached:
 
 ```bash
 MARTIAN_KEY=... npx deepsec init \
@@ -155,6 +156,29 @@ MARTIAN_KEY=... npx deepsec init \
 Use `:bearer` for `Authorization: Bearer …` and `:raw` for provider-specific
 raw token headers. HTTP URLs, embedded URL credentials, invalid header names,
 and custom routes for Codex/Claude are rejected.
+
+OpenCode uses `provider/model` identifiers, so the same custom route works
+there too:
+
+```bash
+MARTIAN_KEY=... npx deepsec init \
+  --agent opencode \
+  --model openai/gpt-5.5 \
+  --model-auth custom \
+  --ai-provider martian \
+  --ai-api-key-env MARTIAN_KEY \
+  --ai-base-url https://api.martian.example/v1 \
+  --ai-credential-header authorization:bearer
+```
+
+### Local agent authentication
+
+Non-sandbox runs can reuse an existing local login for the built-in
+harnesses: `claude login` / `codex login` for those CLIs, or run `opencode`
+and use `/connect` to connect a provider for the OpenCode backend. Local
+OpenCode auth (stored under `$XDG_DATA_HOME/opencode/auth.json`) is never
+copied into Vercel Sandbox workers — sandbox runs need the Gateway (or a
+direct/custom route).
 
 ## Credential brokering in Sandbox
 
@@ -211,5 +235,6 @@ pnpm deepsec sandbox-all process --sandboxes 30 --concurrency 4
 | Direct route asks for a custom variable | Config stores its name, not its value. | Export it in the fresh shell or add it to `.env.local`. |
 | Setup repeats login verification | The link, route, agent, or verification age changed. | Complete the probe; later unchanged runs short-circuit again. |
 | Gateway quota is exhausted | Processing stopped before launching more batches. | Add credits or change route, then re-run; processing resumes pending files. |
+| `Missing AI credentials for --agent opencode` | No Gateway/direct credential and no local OpenCode auth. | Set `AI_GATEWAY_API_KEY`, use a direct route, or run `opencode` and use `/connect` (local runs only). |
 
 References: [AI Gateway authentication](https://vercel.com/docs/ai-gateway/authentication-and-byok#quick-start), [Sandbox authentication](https://vercel.com/docs/vercel-sandbox/concepts/authentication).

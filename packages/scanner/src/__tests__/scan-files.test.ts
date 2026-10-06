@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { loadAllFileRecords, readFileRecord, readRunMeta } from "@deepsec/core";
+import {
+  defineConfig,
+  loadAllFileRecords,
+  readFileRecord,
+  readRunMeta,
+  setLoadedConfig,
+} from "@deepsec/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { scanFiles } from "../index.js";
 
@@ -102,5 +108,72 @@ describe("scanFiles()", () => {
     await scanFiles({ projectId, root, filePaths: ["src/x.ts"] });
     const after = readFileRecord(projectId, "src/x.ts")!;
     expect(after.candidates.length).toBe(candCountBefore);
+  });
+
+  it("throws on unknown matcher slugs", async () => {
+    const { root, projectId } = makeProject({ "a.ts": "x\n" });
+    await expect(
+      scanFiles({
+        projectId,
+        root,
+        filePaths: ["a.ts"],
+        matcherSlugs: ["xss", "does-not-exist", "also-fake"],
+      }),
+    ).rejects.toThrow(/Unknown matcher slugs: does-not-exist, also-fake/);
+  });
+});
+
+describe("scanFiles() with config matchers filter", () => {
+  afterEach(() => {
+    setLoadedConfig(defineConfig({ projects: [] }));
+  });
+
+  it("excludes config-listed matchers from scans", async () => {
+    const { root, projectId } = makeProject({
+      "src/x.ts": 'const q = "SELECT * FROM users WHERE id = " + req.query.id;\n',
+    });
+    setLoadedConfig(
+      defineConfig({ projects: [], matchers: { exclude: ["js-sql-raw", "dangerous-html"] } }),
+    );
+
+    const result = await scanFiles({ projectId, root, filePaths: ["src/x.ts"] });
+    expect(result.activeMatchers).not.toContain("js-sql-raw");
+    expect(result.skippedMatchers).not.toContain("js-sql-raw");
+  });
+
+  it("restricts scans to matchers listed in config only", async () => {
+    const { root, projectId } = makeProject({
+      "src/x.ts": 'const q = "SELECT * FROM users WHERE id = " + req.query.id;\n',
+    });
+    setLoadedConfig(defineConfig({ projects: [], matchers: { only: ["js-nosql-injection"] } }));
+
+    const result = await scanFiles({ projectId, root, filePaths: ["src/x.ts"] });
+    expect(result.activeMatchers).toEqual(["js-nosql-injection"]);
+    // The sql matcher was excluded by the only-list, not by its gate.
+    expect([...result.activeMatchers, ...result.skippedMatchers]).not.toContain("js-sql-raw");
+  });
+
+  it("lets explicit matcherSlugs override the config filter", async () => {
+    const { root, projectId } = makeProject({
+      "src/x.ts": 'const q = "SELECT * FROM users WHERE id = " + req.query.id;\n',
+    });
+    setLoadedConfig(defineConfig({ projects: [], matchers: { exclude: ["js-sql-raw"] } }));
+
+    const result = await scanFiles({
+      projectId,
+      root,
+      filePaths: ["src/x.ts"],
+      matcherSlugs: ["js-sql-raw"],
+    });
+    expect(result.activeMatchers).toEqual(["js-sql-raw"]);
+  });
+
+  it("fails loud on unknown slugs in the config filter", async () => {
+    const { root, projectId } = makeProject({ "a.ts": "x\n" });
+    setLoadedConfig(defineConfig({ projects: [], matchers: { exclude: ["no-such-matcher"] } }));
+
+    await expect(scanFiles({ projectId, root, filePaths: ["a.ts"] })).rejects.toThrow(
+      /Unknown matcher slug in config matchers: no-such-matcher/,
+    );
   });
 });

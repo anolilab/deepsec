@@ -13,6 +13,7 @@ import {
   type ThreadItem,
 } from "@openai/codex-sdk";
 import {
+  AgentPolicyRefusalError,
   attributionHeaders,
   backoff,
   buildInvestigateJsonRepairPrompt,
@@ -319,8 +320,16 @@ function buildCodexInvocation(): CodexInvocation {
   // codex use its default openai provider against their session). Sandbox
   // workers always go gateway; the preflight ensures a token is present
   // before we ever get here in that path.
-  const haveApiToken = !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-  const subscriptionHome = haveApiToken ? null : findCodexSubscriptionAuth();
+  //
+  // Precedence matches the codex CLI itself: a ChatGPT/Codex subscription
+  // login wins over an ambient OPENAI_API_KEY / ANTHROPIC_AUTH_TOKEN, so a
+  // stray API key in the environment no longer silently burns API credits
+  // while a valid subscription sits unused (#32). An explicit base URL
+  // (OPENAI_BASE_URL / ANTHROPIC_BASE_URL — e.g. the AI Gateway expansion
+  // or a direct-provider route) means the token was routed deliberately,
+  // so in that case the token wins and the subscription is ignored.
+  const hasExplicitRouting = Boolean(process.env.OPENAI_BASE_URL ?? process.env.ANTHROPIC_BASE_URL);
+  const subscriptionHome = hasExplicitRouting ? null : findCodexSubscriptionAuth();
 
   const codexHome = makeCodexHome();
   if (subscriptionHome) {
@@ -955,6 +964,17 @@ export class CodexAgentSdkPlugin implements AgentPlugin {
       try {
         parsedOutcome = parseInvestigateResults(resultText, batch);
       } catch (err) {
+        if (err instanceof AgentPolicyRefusalError) {
+          writeParseFailureDebug({
+            projectId,
+            phase: "investigate",
+            agentType: this.type,
+            resultText,
+            error: err,
+            batch,
+          });
+          throw err;
+        }
         yield {
           type: "thinking" as const,
           message: "Codex returned non-JSON investigation output; requesting JSON-only repair",
@@ -1240,6 +1260,17 @@ export class CodexAgentSdkPlugin implements AgentPlugin {
       try {
         verdicts = parseRevalidateVerdicts(resultText);
       } catch (err) {
+        if (err instanceof AgentPolicyRefusalError) {
+          writeParseFailureDebug({
+            projectId,
+            phase: "revalidate",
+            agentType: this.type,
+            resultText,
+            error: err,
+            batch,
+          });
+          throw err;
+        }
         yield {
           type: "thinking" as const,
           message: "Codex returned non-JSON revalidation output; requesting JSON-only repair",

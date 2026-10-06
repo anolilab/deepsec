@@ -47,6 +47,10 @@ describe("bundle e2e", () => {
     expect(stdout).toContain("deepsec");
     expect(stdout).toContain("scan");
     expect(stdout).toContain("process");
+
+    const processHelp = runBundle(["process", "--help"]);
+    expect(processHelp.status).toBe(0);
+    expect(processHelp.stdout).toContain("opencode");
   });
 
   it("config.d.ts is self-contained (no internal @deepsec/* re-exports)", () => {
@@ -186,7 +190,9 @@ export default defineConfig({
       expect(stdout).toContain("webapp-debug-flag");
       expect(stdout).toContain("webapp-route-no-rate-limit");
     } finally {
-      fs.rmSync(link, { force: true });
+      try {
+        fs.unlinkSync(link);
+      } catch {}
       fs.rmSync(path.join(sampleDir, "data"), { recursive: true, force: true });
     }
   });

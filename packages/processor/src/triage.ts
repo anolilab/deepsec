@@ -12,10 +12,12 @@ import {
   writeFileRecord,
   writeRunMeta,
 } from "@deepsec/core";
+import { parseAgentJsonArray, writeParseFailureDebug } from "./agents/shared.js";
 
 const TRIAGE_BATCH_SIZE = 30;
 
 interface TriageVerdict {
+  id?: number;
   title: string;
   priority: TriagePriority;
   exploitability: "trivial" | "moderate" | "difficult";
@@ -123,6 +125,7 @@ export async function triage(params: {
     const findingsList = batch
       .map((item, idx) => {
         return `### ${idx + 1}. ${item.finding.title}
+- **ID:** ${idx + 1}
 - **File:** \`${item.record.filePath}\`
 - **Severity:** ${item.finding.severity}
 - **Slug:** ${item.finding.vulnSlug}
@@ -163,9 +166,13 @@ ${findingsList}
 
 ## Output
 
+Return one object per finding above, echoing its **ID** so each verdict can be
+matched back to the exact finding it judged (titles are not unique).
+
 \`\`\`json
 [
   {
+    "id": 1,
     "title": "exact title",
     "priority": "P0" | "P1" | "P2" | "skip",
     "exploitability": "trivial" | "moderate" | "difficult",
@@ -193,16 +200,44 @@ ${findingsList}
         }
       }
 
-      const jsonMatch = resultText.match(/```json\s*([\s\S]*?)```/);
-      const jsonStr = jsonMatch ? jsonMatch[1].trim() : resultText.trim();
-      let verdicts: TriageVerdict[] = [];
+      // Reuse the project's tolerant parse + fail-loud path (jsonrepair,
+      // then throw on unrecoverable output). A bare `JSON.parse` swallowed in
+      // a catch left `verdicts = []`, so a trailing comma or truncated array
+      // silently dropped the whole batch's triage while still reporting the
+      // batch as a success — indistinguishable from a clean "nothing to do".
+      let verdicts: TriageVerdict[];
       try {
-        verdicts = JSON.parse(jsonStr);
-      } catch {}
+        verdicts = parseAgentJsonArray({
+          resultText,
+          parseFailurePrefix: "Triage output wasn't a parseable JSON verdict array",
+          nonArrayMessage: (parsed) =>
+            `Triage output was JSON but not an array of verdicts. Got: ${typeof parsed}`,
+        }) as TriageVerdict[];
+      } catch (parseErr) {
+        writeParseFailureDebug({
+          projectId,
+          phase: "revalidate",
+          agentType: "triage",
+          resultText,
+          error: parseErr,
+          batch: batch.map((b) => b.record),
+        });
+        throw parseErr; // surface to the outer catch so the batch is marked failed, not silently empty
+      }
 
+      // Match verdicts back to findings by the 1-based ID emitted in the
+      // prompt, not by title: titles are free-text and recur across a batch,
+      // so title-matching mis-attributes verdicts among same-titled findings.
+      // Fall back to title only when the model omits the id. Guard against a
+      // single finding being assigned twice (duplicate id/title in the reply).
+      const assigned = new Set<(typeof batch)[number]>();
       for (const verdict of verdicts) {
-        const item = batch.find((b) => b.finding.title === verdict.title);
-        if (!item) continue;
+        const item =
+          typeof verdict.id === "number" && verdict.id >= 1 && verdict.id <= batch.length
+            ? batch[verdict.id - 1]
+            : batch.find((b) => b.finding.title === verdict.title);
+        if (!item || assigned.has(item)) continue;
+        assigned.add(item);
 
         item.finding.triage = {
           priority: verdict.priority,
