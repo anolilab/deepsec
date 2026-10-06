@@ -1,16 +1,17 @@
 ---
 title: "Models"
-description: "Choose Codex, Claude, or Pi for process and revalidate runs, and compare models under the same workload."
+description: "Choose Codex, Claude, OpenCode, or Pi for process and revalidate runs, and compare models under the same workload."
 ---
 
 deepsec talks to LLMs through interchangeable agent backends:
 
-| Backend                     | Default model         | Used by                      |
-|-----------------------------|-----------------------|------------------------------|
-| `codex` (default)           | `gpt-5.5`             | `process`, `revalidate`      |
-| `claude`                    | `claude-opus-4-8`     | `process`, `revalidate`      |
-| `pi`                        | `zai/glm-5.2`        | `process`, `revalidate` |
-| `claude` (triage)           | `claude-sonnet-4-6`   | `triage` (Claude-only)       |
+| Backend                     | Default model                   | Used by                 |
+|-----------------------------|---------------------------------|-------------------------|
+| `codex` (default)           | `gpt-5.5`                       | `process`, `revalidate` |
+| `claude`                    | `claude-opus-4-8`               | `process`, `revalidate` |
+| `opencode`                  | `anthropic/claude-opus-4-8`     | `process`, `revalidate` |
+| `pi`                        | `zai/glm-5.2`                   | `process`, `revalidate` |
+| `claude` (triage)           | `claude-sonnet-4-6`             | `triage` (Claude-only)  |
 
 Interactive one-shot setup recommends five benchmark-backed combinations:
 GPT-5.6 Sol, Claude Opus 5, Kimi K3, Grok 4.5, and the current DeepSeek entry.
@@ -55,6 +56,12 @@ disables the env-var preflight checks — the machine-wide login is used
 directly. Sandbox commands are the exception: they must broker a real token,
 so they still require `AI_GATEWAY_API_KEY` (or an equivalent key).
 
+
+The built-in backends also work with direct `AI_GATEWAY_API_KEY` credentials:
+one key covers Codex, Claude, OpenCode, and Pi. OpenCode and Pi accept
+provider/model identifiers directly, which makes them useful for comparing
+harness and provider behavior under the same deepsec workload.
+
 ## CLI selection
 
 ```bash
@@ -69,6 +76,10 @@ pnpm deepsec process --project-id my-app --agent codex
 
 # Codex backend, specific model:
 pnpm deepsec process --project-id my-app --agent codex --model gpt-5.4
+
+# OpenCode SDK harness (provider/model is required):
+pnpm deepsec process --project-id my-app --agent opencode
+pnpm deepsec process --project-id my-app --agent opencode --model openai/gpt-5.5
 
 # Pi backend through Vercel AI Gateway, default model:
 pnpm deepsec process --project-id my-app --agent pi
@@ -101,11 +112,12 @@ over large repos.
 
 The flag maps onto each backend's native dial:
 
-| Backend  | Setting                                     |
-|----------|---------------------------------------------|
-| `codex`  | model reasoning effort (`minimal`–`xhigh`)  |
-| `pi`     | thinking level (`minimal`–`xhigh`)          |
-| `claude` | adaptive-thinking effort (`minimal` → `low`, `xhigh` → `max`) |
+| Backend    | Setting                                                       |
+|------------|---------------------------------------------------------------|
+| `codex`    | model reasoning effort (`minimal`–`xhigh`)                    |
+| `opencode` | provider variant (Anthropic maps to `high` / `max`)           |
+| `pi`       | thinking level (`minimal`–`xhigh`)                            |
+| `claude`   | adaptive-thinking effort (`minimal` → `low`, `xhigh` → `max`) |
 
 It applies to the main investigation/revalidation runs only.
 Special-purpose follow-up calls (the refusal report, JSON repair) keep
@@ -171,6 +183,29 @@ Later `process`, `revalidate`, and Sandbox commands resolve the persisted
 route. Per-command `--ai-provider`, `--ai-base-url`, `--ai-api-key-env`, and
 repeatable `--ai-header name=value` remain available as Pi runtime overrides.
 
+### OpenCode SDK harness
+
+OpenCode uses `@opencode-ai/sdk/v2` plus the `opencode-ai` runtime. Each
+batch starts a local OpenCode server, creates a session rooted at the target
+project, and requests JSON Schema output. The deepsec agent allows only
+`read`, `glob`, `grep`, and `list`; shell, edits, network tools, subagents,
+external directories, LSP, skills, and MCP-triggered permissions are denied.
+The session and server are closed on success, error, or abort.
+
+Models use OpenCode's required `provider/model` form:
+
+```bash
+pnpm deepsec process --project-id my-app \
+  --agent opencode \
+  --model anthropic/claude-opus-4-8
+```
+
+For a local run without environment credentials, authenticate a provider in
+OpenCode first: run `opencode`, then use `/connect`. Sandbox runs cannot reuse
+that local credential store; use AI Gateway or an explicit provider token.
+Generic `--ai-provider`, `--ai-base-url`, `--ai-api-key-env`, and
+`--ai-header` overrides work for OpenCode as they do for Pi.
+
 ### `claude-sonnet-4-6` for `triage`
 
 Triage buckets findings into P0/P1/P2/skip without re-reading the code.
@@ -216,6 +251,7 @@ rest of deepsec stays unchanged:
 ```bash
 pnpm deepsec process --project-id my-app --model anthropic-mythos-1
 pnpm deepsec process --project-id my-app --agent codex --model gpt-6
+pnpm deepsec process --project-id my-app --agent opencode --model anthropic/claude-mythos-1
 pnpm deepsec process --project-id my-app --agent pi --model vercel-ai-gateway/openai/gpt-6
 ```
 

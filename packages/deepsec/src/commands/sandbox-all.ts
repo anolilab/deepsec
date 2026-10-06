@@ -216,6 +216,7 @@ export async function sandboxAllCommand(
       agentType,
       aiApiKeyEnv: explicitAiApiKeyEnv,
       aiBaseUrl: explicitAiBaseUrl ?? resolvedRoute?.route.baseUrl,
+      aiProvider: extractFlag(passthrough, "--ai-provider"),
       brokeredModelCredential: resolvedRoute?.broker,
       model: extractFlag(passthrough, "--model") ?? defaultModelForAgent(agentType),
       snapshotId: undefined,

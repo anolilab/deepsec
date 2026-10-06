@@ -76,6 +76,8 @@ export interface BrokeredCredentials {
 export interface BrokeredCredentialOptions {
   aiApiKeyEnv?: string;
   aiBaseUrl?: string;
+  aiProvider?: string;
+  model?: string;
   brokeredModelCredential?: BrokeredModelCredential;
 }
 
@@ -92,11 +94,12 @@ export function resolveBrokeredCredentials(
   if (options.brokeredModelCredential) {
     return { selected: options.brokeredModelCredential };
   }
-  const anthropicToken = process.env.ANTHROPIC_AUTH_TOKEN;
+  const anthropicToken = process.env.ANTHROPIC_AUTH_TOKEN ?? process.env.ANTHROPIC_API_KEY;
   const explicitOpenai = process.env.OPENAI_API_KEY;
+  const configurableAgent = agentType === "pi" || agentType === "opencode";
   const aiGatewayToken = agentType === "pi" ? process.env.AI_GATEWAY_API_KEY : undefined;
   const customToken =
-    agentType === "pi" && options.aiApiKeyEnv && process.env[options.aiApiKeyEnv]
+    configurableAgent && options.aiApiKeyEnv && process.env[options.aiApiKeyEnv]
       ? { envName: options.aiApiKeyEnv, token: process.env[options.aiApiKeyEnv]! }
       : undefined;
   // Only borrow ANTHROPIC for OPENAI on the codex path — and only when the
@@ -117,7 +120,19 @@ const PROXY_SCRIPT_BY_MODE: Record<DeepsecMode, string> = {
   dev: `${DEEPSEC_DIR}/packages/deepsec/src/sandbox/request-proxy.mjs`,
   installed: `${DEEPSEC_DIR}/node_modules/deepsec/dist/sandbox/request-proxy.mjs`,
 };
+const OPENCODE_BINARY_BY_MODE: Record<DeepsecMode, string> = {
+  dev: `${DEEPSEC_DIR}/packages/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
+  installed: `${DEEPSEC_DIR}/node_modules/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
+};
 const CODEX_HOME = "/vercel/sandbox/.codex";
+const OPENCODE_PROVIDER_ENV = "DEEPSEC_OPENCODE_PROVIDER";
+const OPENCODE_CUSTOM_BASE_URL_ENV = "DEEPSEC_OPENCODE_AI_BASE_URL";
+
+function providerFromModel(model: string | undefined): string | undefined {
+  if (!model) return undefined;
+  const slash = model.indexOf("/");
+  return slash > 0 ? model.slice(0, slash) : undefined;
+}
 
 export function buildSandboxEnv(
   agentType: string | undefined,
@@ -162,6 +177,16 @@ export function buildSandboxEnv(
       env[PI_CUSTOM_BASE_URL_ENV] = options.aiBaseUrl;
     }
   }
+  if (agentType === "opencode") {
+    const provider = options.aiProvider ?? providerFromModel(options.model) ?? "anthropic";
+    env[OPENCODE_PROVIDER_ENV] = provider;
+    if (credentials.customToken) {
+      env[credentials.customToken.envName] = BROKERED_TOKEN_PLACEHOLDER;
+    }
+    if (options.aiBaseUrl) {
+      env[OPENCODE_CUSTOM_BASE_URL_ENV] = options.aiBaseUrl;
+    }
+  }
 
   // Belt-and-suspenders alongside the worker egress firewall: the master
   // kill-switch covers DISABLE_TELEMETRY / DISABLE_ERROR_REPORTING /
@@ -186,12 +211,13 @@ export function buildSandboxEnv(
   // body mutation needed for Codex, so a proxy hop would just add latency
   // and a base-url-rewriting hazard (path doubling, etc.). spawnFromSnapshot
   // skips the proxy startup when agentType=codex for the same reason.
+  const openCodeProvider = env[OPENCODE_PROVIDER_ENV];
   if (agentType === "codex") {
     env["CODEX_HOME"] = CODEX_HOME;
     if (!env["OPENAI_BASE_URL"] && env["ANTHROPIC_BASE_URL"]) {
       env["OPENAI_BASE_URL"] = env["ANTHROPIC_BASE_URL"];
     }
-  } else {
+  } else if (agentType !== "opencode" || openCodeProvider === "anthropic") {
     const realBaseUrl = env["ANTHROPIC_BASE_URL"];
     if (realBaseUrl) {
       env["ANTHROPIC_UPSTREAM_BASE_URL"] = realBaseUrl;
@@ -241,6 +267,9 @@ export function buildWorkerNetworkPolicy(
 ): NetworkPolicy {
   const isCodex = agentType === "codex";
   const isPi = agentType === "pi";
+  const isOpenCode = agentType === "opencode";
+  const openCodeProvider = env[OPENCODE_PROVIDER_ENV] ?? "anthropic";
+  const openCodeCustomBaseUrl = env[OPENCODE_CUSTOM_BASE_URL_ENV];
 
   // Single AI host per backend. Prefer derived from the base URL the agent
   // will actually use; fall back to the provider's documented default when
@@ -249,9 +278,13 @@ export function buildWorkerNetworkPolicy(
     credentials.selected?.host ??
     (isPi
       ? (hostFromUrl(env[PI_CUSTOM_BASE_URL_ENV]) ?? DEFAULT_AI_GATEWAY_HOST)
-      : isCodex
-        ? (hostFromUrl(env["OPENAI_BASE_URL"]) ?? DEFAULT_OPENAI_HOST)
-        : (hostFromUrl(env["ANTHROPIC_UPSTREAM_BASE_URL"]) ?? DEFAULT_ANTHROPIC_HOST));
+      : isOpenCode && openCodeCustomBaseUrl
+        ? (hostFromUrl(openCodeCustomBaseUrl) ?? DEFAULT_ANTHROPIC_HOST)
+        : isOpenCode && openCodeProvider === "openai"
+          ? (hostFromUrl(env["OPENAI_BASE_URL"]) ?? DEFAULT_OPENAI_HOST)
+          : isCodex
+            ? (hostFromUrl(env["OPENAI_BASE_URL"]) ?? DEFAULT_OPENAI_HOST)
+            : (hostFromUrl(env["ANTHROPIC_UPSTREAM_BASE_URL"]) ?? DEFAULT_ANTHROPIC_HOST));
 
   // The fallback flips at resolveBrokeredCredentials — by here, openaiToken
   // already carries the ANTHROPIC gateway token if the user only set that
@@ -261,9 +294,13 @@ export function buildWorkerNetworkPolicy(
     ? env[PI_CUSTOM_BASE_URL_ENV]
       ? credentials.customToken?.token
       : credentials.aiGatewayToken
-    : isCodex
-      ? credentials.openaiToken
-      : credentials.anthropicToken;
+    : isOpenCode && openCodeCustomBaseUrl
+      ? credentials.customToken?.token
+      : isOpenCode && openCodeProvider === "openai"
+        ? credentials.openaiToken
+        : isCodex
+          ? credentials.openaiToken
+          : credentials.anthropicToken;
 
   // App Attribution rides the same per-domain header rewrite that brokers
   // credentials, so every sandboxed agent's gateway traffic is tagged
@@ -400,7 +437,7 @@ export async function createBootstrapSnapshot(opts: BootstrapOptions): Promise<s
     opts.onLog(`Running pnpm ${installArgs.join(" ")}...`);
     await runAndLog(sandbox, "pnpm", installArgs, DEEPSEC_DIR, opts.onLog);
 
-    // Ensure agent native binaries. Both backends ship vendored native binaries
+    // Ensure agent native binaries. The built-in backends ship vendored native binaries
     // through optional deps; pnpm's optional-dep filter on the host platform
     // doesn't always land the right binary on the sandbox. We install the
     // matching binary explicitly per agent.
@@ -408,6 +445,9 @@ export async function createBootstrapSnapshot(opts: BootstrapOptions): Promise<s
       opts.onLog("Ensuring Codex CLI native binary is installed...");
       await ensureCodexNativeBinary(sandbox, opts.onLog);
       await writeCodexConfig(sandbox, opts.onLog);
+    } else if (agentType === "opencode") {
+      opts.onLog("Ensuring OpenCode CLI native binary is installed...");
+      await ensureOpenCodeBinary(sandbox, opts.mode, opts.onLog);
     } else {
       opts.onLog("Ensuring Claude SDK native binaries are installed...");
       await ensureClaudeNativeBinaries(sandbox, opts.onLog);
@@ -436,6 +476,8 @@ export interface SpawnOptions {
   agentType?: string;
   aiApiKeyEnv?: string;
   aiBaseUrl?: string;
+  aiProvider?: string;
+  model?: string;
   /** Explicit setup-selected route. Real value remains host-side. */
   brokeredModelCredential?: BrokeredModelCredential;
   vcpus: number;
@@ -462,6 +504,8 @@ export async function spawnFromSnapshot(opts: SpawnOptions): Promise<Sandbox> {
   const credentialOptions = {
     aiApiKeyEnv: opts.aiApiKeyEnv,
     aiBaseUrl: opts.aiBaseUrl,
+    aiProvider: opts.aiProvider,
+    model: opts.model,
     brokeredModelCredential: opts.brokeredModelCredential,
   };
   const credentials = resolveBrokeredCredentials(opts.agentType, credentialOptions);
@@ -505,7 +549,11 @@ export async function spawnFromSnapshot(opts: SpawnOptions): Promise<Sandbox> {
   // keeps a stub agent out of the proxy startup, which fails fast when
   // ANTHROPIC_UPSTREAM_BASE_URL isn't set — letting the live-sandbox e2e
   // run with no AI credentials.
-  if (opts.agentType === "claude-agent-sdk") {
+  const openCodeUsesAnthropic =
+    opts.agentType === "opencode" &&
+    (opts.aiProvider ?? providerFromModel(opts.model) ?? "anthropic") === "anthropic" &&
+    Boolean(sandboxEnv["ANTHROPIC_UPSTREAM_BASE_URL"]);
+  if (opts.agentType === "claude-agent-sdk" || openCodeUsesAnthropic) {
     await startRequestProxy(sandbox, opts.mode, opts.onLog);
   }
 
@@ -549,6 +597,39 @@ exit 1
   }
   if (check.exitCode !== 0) {
     throw new Error(`request-proxy failed to start (exit ${check.exitCode})`);
+  }
+}
+
+export async function ensureOpenCodeBinary(
+  sandbox: Sandbox,
+  mode: DeepsecMode,
+  onLog: (msg: string) => void,
+): Promise<void> {
+  const binaryPath = OPENCODE_BINARY_BY_MODE[mode];
+  const link = await sandbox.runCommand({
+    cmd: "ln",
+    args: ["-sfn", binaryPath, "/usr/local/bin/opencode"],
+    sudo: true,
+  });
+  if (link.exitCode !== 0) {
+    const stderr = (await link.stderr()).trim();
+    throw new Error(
+      `OpenCode native binary link failed (exit ${link.exitCode})${stderr ? `: ${stderr}` : ""}`,
+    );
+  }
+
+  const result = await sandbox.runCommand({
+    cmd: "opencode",
+    args: ["--version"],
+    cwd: DEEPSEC_DIR,
+  });
+  const stdout = (await result.stdout()).trim();
+  const stderr = (await result.stderr()).trim();
+  for (const line of `${stdout}\n${stderr}`.split("\n")) {
+    if (line.trim()) onLog(`  ${line}`);
+  }
+  if (result.exitCode !== 0) {
+    throw new Error(`OpenCode native binary check failed (exit ${result.exitCode})`);
   }
 }
 
