@@ -411,7 +411,7 @@ export async function runSetupWorkflow(
       // The installer is a child process that just finished writing this
       // tree, so a lagging mount can still report it missing.
       !isCheckpointCurrent(state, "install", installInput, () =>
-        existsSettled("node_modules/deepsec"),
+        existsSettled("node_modules/@anolilab/deepsec"),
       )
     ) {
       installResult = await runPhase(state, reporter, "install", installInput, () =>

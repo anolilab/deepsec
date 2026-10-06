@@ -14,7 +14,7 @@ importers:
 
   .:
     dependencies:
-      deepsec:
+      '@anolilab/deepsec':
         specifier: workspace:*
         version: link:packages/deepsec
     devDependencies:

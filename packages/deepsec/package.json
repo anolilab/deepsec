@@ -1,13 +1,13 @@
 {
-  "name": "deepsec",
-  "version": "2.3.10",
+  "name": "@anolilab/deepsec",
+  "version": "2.4.0",
   "description": "AI-powered vulnerability scanner for any codebase",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vercel-labs/deepsec"
+    "url": "https://github.com/anolilab/deepsec"
   },
-  "homepage": "https://deepsec.sh",
+  "homepage": "https://github.com/anolilab/deepsec#readme",
   "type": "module",
   "bin": {
     "deepsec": "./dist/cli.mjs"

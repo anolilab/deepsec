@@ -10,7 +10,7 @@ want to scan, checked into git so teammates inherit project context.
 From the codebase's repo root:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 This installs the isolated workspace, links and verifies Vercel Sandbox,
@@ -18,7 +18,7 @@ creates the project threat model, checks scan coverage, generates safe
 project-specific matchers when needed, and processes candidates. Re-run it
 to resume, or use `pnpm deepsec setup` from inside `.deepsec/`.
 
-Use `npx deepsec init --scaffold-only` if you only want the files,
+Use `npx @anolilab/deepsec init --scaffold-only` if you only want the files,
 `--model-auth direct` with `--ai-api-key-env` to use your own model key,
 or `--model-auth local` to rely on machine-wide `claude`/`codex` logins
 without any API key. See
@@ -83,7 +83,7 @@ linked-project OIDC. A direct route names your own OpenAI/Anthropic variable,
 and a custom Pi route can declare an HTTPS endpoint and auth header.
 
 ```bash
-MY_ANTHROPIC_KEY=... npx deepsec init \
+MY_ANTHROPIC_KEY=... npx @anolilab/deepsec init \
   --agent claude --model-auth direct \
   --ai-provider anthropic --ai-api-key-env MY_ANTHROPIC_KEY
 ```

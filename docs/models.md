@@ -25,7 +25,7 @@ Choose the backend/model non-interactively so repository analysis and the
 first processing pass use the same pair:
 
 ```bash
-npx deepsec init --agent codex --model gpt-5.5
+npx @anolilab/deepsec init --agent codex --model gpt-5.5
 ```
 
 For benchmark-backed headless selection, use a profile:
@@ -37,7 +37,7 @@ For benchmark-backed headless selection, use a profile:
 | `budget` | Cheapest compatible recommended combination |
 
 ```bash
-npx deepsec init --yes --model-profile value --output jsonl
+npx @anolilab/deepsec init --yes --model-profile value --output jsonl
 ```
 
 Direct OpenAI and Anthropic credentials automatically restrict profiles to a

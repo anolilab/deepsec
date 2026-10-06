@@ -8,7 +8,7 @@ description: "Set up deepsec and run your first scan with one command."
 From the root of the repository you want to scan:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 The command asks you two things, then does the rest on its own:
@@ -36,7 +36,7 @@ to many hours.
 Just run the same command again:
 
 ```bash
-npx deepsec init
+npx @anolilab/deepsec init
 ```
 
 Deepsec remembers how far it got. Finished steps are skipped and the run
@@ -55,7 +55,7 @@ repository pattern.
 You can bound a run and pick up the rest later:
 
 ```bash
-npx deepsec init --max-cost-usd 100 --max-duration 2h
+npx @anolilab/deepsec init --max-cost-usd 100 --max-duration 2h
 ```
 
 When a limit is reached, deepsec stops at a safe point. Run the same
@@ -104,7 +104,7 @@ You don't need a Vercel account to use deepsec with your own API key.
 To use your own OpenAI key:
 
 ```bash
-MY_OPENAI_KEY=... npx deepsec init \
+MY_OPENAI_KEY=... npx @anolilab/deepsec init \
   --agent codex \
   --model-auth direct \
   --ai-provider openai \
@@ -124,7 +124,7 @@ can skip model credentials entirely. Pick **Use local subscriptions** at
 the interactive model-access prompt, or pass the flag directly:
 
 ```bash
-npx deepsec init --model-auth local
+npx @anolilab/deepsec init --model-auth local
 ```
 
 Deepsec then configures nothing for model access: no API key, no gateway
@@ -144,7 +144,7 @@ into an isolated sandbox.
 To create the workspace files without running any of the setup:
 
 ```bash
-npx deepsec init --scaffold-only
+npx @anolilab/deepsec init --scaffold-only
 ```
 
 This writes the `.deepsec/` skeleton — `deepsec.config.ts`,
@@ -158,7 +158,7 @@ runs, drive the remaining setup from a coding agent, or do the steps by
 hand. The command prints the manual path: `pnpm install` inside
 `.deepsec/`, an agent prompt for filling in `INFO.md`, then
 `pnpm deepsec scan` and `pnpm deepsec process`. You can also run
-`pnpm deepsec setup` (or re-run `npx deepsec init`) later to complete
+`pnpm deepsec setup` (or re-run `npx @anolilab/deepsec init`) later to complete
 the normal automated flow from where the scaffold left off.
 
 ## Two files worth a look
@@ -196,10 +196,10 @@ it never prompts or opens a browser. The two commands that matter:
 
 ```bash
 # Preview everything setup would do, without changing anything
-npx deepsec init --plan --output json
+npx @anolilab/deepsec init --plan --output json
 
 # Run unattended: accept defaults, pick a model by profile, stream events
-npx deepsec init --yes --model-profile value --output jsonl
+npx @anolilab/deepsec init --yes --model-profile value --output jsonl
 ```
 
 `--model-profile` picks the model for you: `best` (highest benchmark
@@ -213,13 +213,13 @@ authenticate with explicit values instead of a login:
 
 ```bash
 VERCEL_TOKEN=... VERCEL_TEAM_ID=team_... VERCEL_PROJECT_ID=prj_... \
-npx deepsec init --headless
+npx @anolilab/deepsec init --headless
 ```
 
 Coding agents should read the docs deepsec installs into the workspace,
 which always match the installed version: start with
-`.deepsec/node_modules/deepsec/SKILL.md`, then the topics under
-`.deepsec/node_modules/deepsec/dist/docs/`.
+`.deepsec/node_modules/@anolilab/deepsec/SKILL.md`, then the topics under
+`.deepsec/node_modules/@anolilab/deepsec/dist/docs/`.
 
 ## Scanning more than one repository
 

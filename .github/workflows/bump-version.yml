@@ -248,7 +248,7 @@ jobs:
             fi
           else
             commit_sha="$branch_sha"
-            echo "::notice::$BRANCH already contains deepsec@$NEW_VERSION"
+            echo "::notice::$BRANCH already contains @anolilab/deepsec@$NEW_VERSION"
           fi
 
           pr_url=$(gh pr list \

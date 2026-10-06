@@ -8,6 +8,6 @@
     "deepsec": "pnpm -s -C ../packages/deepsec bundle && pnpm exec deepsec"
   },
   "dependencies": {
-    "deepsec": "link:../packages/deepsec"
+    "@anolilab/deepsec": "link:../packages/deepsec"
   }
 }

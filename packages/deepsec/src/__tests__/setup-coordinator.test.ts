@@ -57,7 +57,9 @@ describe("one-shot setup coordinator", () => {
         through: "login",
         services: {
           install: async () => {
-            fs.mkdirSync(path.join(workspace, "node_modules", "deepsec"), { recursive: true });
+            fs.mkdirSync(path.join(workspace, "node_modules", "@anolilab", "deepsec"), {
+              recursive: true,
+            });
             return { packageManager: "npm", version: "test", installed: true };
           },
           connect: async () => {
@@ -105,7 +107,9 @@ describe("one-shot setup coordinator", () => {
     fs.writeFileSync(path.join(workspace, "data", "app", "INFO.md"), "placeholder\n");
 
     const install = vi.fn(async ({ workspaceDir }: { workspaceDir: string }) => {
-      fs.mkdirSync(path.join(workspaceDir, "node_modules", "deepsec"), { recursive: true });
+      fs.mkdirSync(path.join(workspaceDir, "node_modules", "@anolilab", "deepsec"), {
+        recursive: true,
+      });
       return { packageManager: "pnpm" as const, version: "test", installed: true };
     });
     const connect = vi.fn(async (_options: SetupWorkflowOptions) => ({
@@ -340,7 +344,9 @@ describe("one-shot setup coordinator", () => {
       model: "test-model",
       services: {
         install: async () => {
-          fs.mkdirSync(path.join(workspace, "node_modules", "deepsec"), { recursive: true });
+          fs.mkdirSync(path.join(workspace, "node_modules", "@anolilab", "deepsec"), {
+            recursive: true,
+          });
           return { packageManager: "npm" as const, version: "test", installed: true };
         },
         connect: async () => ({ verification: { project: "linked" } }),

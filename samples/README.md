@@ -1,7 +1,7 @@
 # Samples
 
 Reference material for extending a workspace after one-shot setup. Start with
-`npx deepsec init`; do not copy a sample as a replacement initializer.
+`npx @anolilab/deepsec init`; do not copy a sample as a replacement initializer.
 
 ## What's here
 

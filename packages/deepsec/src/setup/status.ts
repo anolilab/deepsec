@@ -23,9 +23,9 @@ export function buildSetupStatus(options: {
   const outputIssue = (phase: SetupPhase): string | undefined => {
     if (
       phase === "install" &&
-      !fs.existsSync(path.join(options.workspaceDir, "node_modules", "deepsec"))
+      !fs.existsSync(path.join(options.workspaceDir, "node_modules", "@anolilab", "deepsec"))
     ) {
-      return "node_modules/deepsec is missing";
+      return "node_modules/@anolilab/deepsec is missing";
     }
     if (
       phase === "info" &&

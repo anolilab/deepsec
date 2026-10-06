@@ -29,10 +29,10 @@ describe("post-install workspace probe", () => {
 
   function installedWorkspace(): string {
     const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "deepsec-install-"));
-    const installed = path.join(workspace, "node_modules", "deepsec", "dist");
+    const installed = path.join(workspace, "node_modules", "@anolilab", "deepsec", "dist");
     fs.mkdirSync(installed, { recursive: true });
     fs.writeFileSync(
-      path.join(workspace, "node_modules", "deepsec", "package.json"),
+      path.join(workspace, "node_modules", "@anolilab", "deepsec", "package.json"),
       JSON.stringify({ version: "1.2.3" }),
     );
     fs.writeFileSync(path.join(installed, "cli.mjs"), "");
@@ -66,7 +66,7 @@ describe("post-install workspace probe", () => {
     const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "deepsec-install-"));
     expect(probeWorkspaceInstall(workspace)).toEqual({
       ok: false,
-      reason: "node_modules/deepsec is missing",
+      reason: "node_modules/@anolilab/deepsec is missing",
     });
   });
 });

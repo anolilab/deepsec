@@ -39,7 +39,7 @@ describe("setup state", () => {
       ).find((phase) => phase.phase === "install"),
     ).toMatchObject({
       status: "stale",
-      reason: expect.stringContaining("node_modules/deepsec"),
+      reason: expect.stringContaining("node_modules/@anolilab/deepsec"),
     });
   });
 });

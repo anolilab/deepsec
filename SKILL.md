@@ -44,7 +44,7 @@ Ask before doing anything else so the rest of the flow can run unattended.
 From the repository root:
 
 - **No `.deepsec/deepsec.config.ts`** → not onboarded. Do step 3 in full.
-- **`.deepsec/` exists but `.deepsec/node_modules/deepsec` is missing, or a
+- **`.deepsec/` exists but `.deepsec/node_modules/@anolilab/deepsec` is missing, or a
   previous setup was interrupted** → re-run the init command from step 3; it
   resumes from checkpoints and repairs the install rather than starting over.
 - **Otherwise** → onboarded; skip to step 4.
@@ -79,14 +79,14 @@ or launch an interactive login yourself.
 
 Run from inside `.deepsec/` (the config loader only finds
 `deepsec.config.ts` in the current directory or its ancestors; after step 3,
-`npx deepsec` resolves to the copy installed there):
+`npx @anolilab/deepsec` resolves to the copy installed there):
 
 | Scope | Command |
 | --- | --- |
-| Uncommitted changes | `cd .deepsec && npx deepsec process --diff-working` |
-| Diff to main | `cd .deepsec && npx deepsec process --diff origin/main` |
-| Entire codebase, right after step 3 | `cd .deepsec && npx deepsec process` (the final scan from setup already produced the candidate set) |
-| Entire codebase, previously onboarded | `cd .deepsec && npx deepsec scan && npx deepsec process` |
+| Uncommitted changes | `cd .deepsec && npx @anolilab/deepsec process --diff-working` |
+| Diff to main | `cd .deepsec && npx @anolilab/deepsec process --diff origin/main` |
+| Entire codebase, right after step 3 | `cd .deepsec && npx @anolilab/deepsec process` (the final scan from setup already produced the candidate set) |
+| Entire codebase, previously onboarded | `cd .deepsec && npx @anolilab/deepsec scan && npx @anolilab/deepsec process` |
 
 ## 5. Interpret results
 
@@ -94,13 +94,13 @@ Run from inside `.deepsec/` (the config loader only finds
   least one net-new finding (not an error), anything else = runtime error.
   Pre-existing findings on touched files are excluded from the gate.
 - Summarize any findings for the user, then offer follow-ups (all from
-  inside `.deepsec/`): `npx deepsec report`, `npx deepsec revalidate`, and
-  `npx deepsec export --format md-dir --out ./findings`.
+  inside `.deepsec/`): `npx @anolilab/deepsec report`, `npx @anolilab/deepsec revalidate`, and
+  `npx @anolilab/deepsec export --format md-dir --out ./findings`.
 
 ## Going deeper
 
 After onboarding, full documentation ships with the installed package at
-`.deepsec/node_modules/deepsec/dist/docs/` — `getting-started.md`,
+`.deepsec/node_modules/@anolilab/deepsec/dist/docs/` — `getting-started.md`,
 `reviewing-changes.md` (direct mode, exit codes, CI gating),
 `configuration.md`, `models.md`, and more. Read the relevant doc before
 varying the commands above; flags and defaults change between releases.

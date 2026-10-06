@@ -1,4 +1,4 @@
-import type { CandidateMatch, MatcherPlugin } from "deepsec/config";
+import type { CandidateMatch, MatcherPlugin } from "@anolilab/deepsec/config";
 
 /**
  * Archive-extraction sites where a tarball/zip is unpacked to disk. Without

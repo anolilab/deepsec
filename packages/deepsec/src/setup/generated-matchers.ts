@@ -79,7 +79,7 @@ export function writeGeneratedMatchers(
   specs: DeclarativeMatcherSpec[],
 ): string {
   const file = path.join(workspaceDir, "generated-matchers.ts");
-  const content = `import { compileDeclarativeMatchers, type DeepsecPlugin } from "deepsec/config";\n\nconst specs = ${JSON.stringify(specs, null, 2)};\n\nexport const generatedMatchersPlugin: DeepsecPlugin = {\n  name: "deepsec-generated-matchers",\n  matchers: compileDeclarativeMatchers(specs),\n};\n`;
+  const content = `import { compileDeclarativeMatchers, type DeepsecPlugin } from "@anolilab/deepsec/config";\n\nconst specs = ${JSON.stringify(specs, null, 2)};\n\nexport const generatedMatchersPlugin: DeepsecPlugin = {\n  name: "deepsec-generated-matchers",\n  matchers: compileDeclarativeMatchers(specs),\n};\n`;
   atomicWriteFileSync(file, content);
   return file;
 }

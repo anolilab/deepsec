@@ -13,7 +13,7 @@ Currently configured project: `deepsec` (target: `..`).
 
 1. `pnpm install` — installs deepsec.
 2. Add your AI Gateway token to `.env.local`. See
-   `node_modules/deepsec/dist/docs/vercel-setup.md` after install.
+   `node_modules/@anolilab/deepsec/dist/docs/vercel-setup.md` after install.
 3. Open the parent repo in your coding agent (Claude Code, Cursor, …)
    and have it follow `data/deepsec/SETUP.md` to fill in
    `data/deepsec/INFO.md`.
@@ -131,8 +131,8 @@ user/CI opt-in — it's not invoked on every scan.
 
 After `pnpm install`:
 
-- Skill: `node_modules/deepsec/SKILL.md`
-- Full docs: `node_modules/deepsec/dist/docs/{getting-started,configuration,models,writing-matchers,plugins,architecture,data-layout,vercel-setup,faq}.md`
+- Skill: `node_modules/@anolilab/deepsec/SKILL.md`
+- Full docs: `node_modules/@anolilab/deepsec/dist/docs/{getting-started,configuration,models,writing-matchers,plugins,architecture,data-layout,vercel-setup,faq}.md`
 
 Or browse on
 [GitHub](https://github.com/vercel/deepsec/tree/main/docs).

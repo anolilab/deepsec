@@ -99,7 +99,7 @@ cpSync(resolve(repoRoot, "samples"), resolve(distDir, "samples"), {
 
 // The request-proxy is a standalone .mjs that runs on the sandbox worker
 // (not bundled into cli.mjs — it executes in its own node process). Ship it
-// verbatim so installed-mode workers can spawn it from node_modules/deepsec/.
+// verbatim so installed-mode workers can spawn it from node_modules/@anolilab/deepsec/.
 mkdirSync(resolve(distDir, "sandbox"), { recursive: true });
 cpSync(
   resolve(__dirname, "src/sandbox/request-proxy.mjs"),

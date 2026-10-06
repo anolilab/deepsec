@@ -13,7 +13,10 @@ function commandResult(exitCode: number, stdout = "", stderr = "") {
 describe("ensureOpenCodeBinary", () => {
   it.each([
     ["dev", `${DEEPSEC_DIR}/packages/deepsec/node_modules/opencode-ai/bin/opencode.exe`],
-    ["installed", `${DEEPSEC_DIR}/node_modules/deepsec/node_modules/opencode-ai/bin/opencode.exe`],
+    [
+      "installed",
+      `${DEEPSEC_DIR}/node_modules/@anolilab/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
+    ],
   ] as const)("links the %s package binary onto PATH", async (mode, source) => {
     const runCommand = vi
       .fn()

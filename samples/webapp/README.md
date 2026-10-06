@@ -31,7 +31,7 @@ replace the generated workspace config wholesale.
 
 ```bash
 # Start and complete setup from your repo root.
-npx deepsec init
+npx @anolilab/deepsec init
 
 # Later, when a true-positive needs richer logic than a declarative matcher,
 # look at this sample's matchers/*.ts for the shape, and read

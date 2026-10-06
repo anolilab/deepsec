@@ -43,6 +43,7 @@ import type {
   RevalidateOutput,
   RevalidateParams,
   RevalidateVerdict,
+  SetupTaskParams,
 } from "./types.js";
 
 const DEFAULT_MODEL = "anthropic/claude-opus-4-8";
@@ -1702,5 +1703,47 @@ export class OpenCodeAgentPlugin implements AgentPlugin {
     } finally {
       await disposeRunContext(context);
     }
+  }
+}
+
+/**
+ * Run one schema-oriented, read-only repository task (first-run threat
+ * model, coverage analysis) through the OpenCode harness. Works on both
+ * runtime generations: v1 via the SDK session prompt, v2 via the async
+ * inbox — `runPrompt` dispatches. Setup tasks return plain text that the
+ * caller parses, so no structured-output format is requested.
+ */
+export async function runOpenCodeSetupTask(params: SetupTaskParams): Promise<string> {
+  const config: Record<string, unknown> = {
+    ...params.config,
+    // Setup tasks are small, single-purpose repository reads — cap the
+    // agent loop well below the investigation default.
+    ...(params.config.maxTurns === undefined ? { maxTurns: 40 } : {}),
+  };
+  const context = await createRunContext({
+    projectRoot: params.projectRoot,
+    config,
+    signal: params.signal,
+    title: "deepsec setup",
+  });
+  try {
+    const model = readConfig(config).model ?? DEFAULT_MODEL;
+    params.onProgress?.({
+      type: "started",
+      message: `Understanding repository with OpenCode (${model})`,
+    });
+    const result = await runPrompt({
+      context,
+      prompt: params.prompt,
+      format: TEXT_FORMAT,
+      config,
+    });
+    for (const progress of result.progress) params.onProgress?.(progress);
+    const text = result.resultText.trim();
+    if (!text) throw new Error("OpenCode produced no setup result");
+    params.onProgress?.({ type: "complete", message: "Repository setup analysis complete" });
+    return text;
+  } finally {
+    await disposeRunContext(context);
   }
 }

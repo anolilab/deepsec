@@ -13,7 +13,7 @@ export { DATA_DIR, DEEPSEC_DIR, TARGET_DIR };
 
 /**
  * Whether the running CLI lives inside the source repo (`dev`) or inside a
- * user's `.deepsec/node_modules/deepsec` install (`installed`). Drives:
+ * user's `.deepsec/node_modules/@anolilab/deepsec` install (`installed`). Drives:
  *   - which directory gets tarballed and uploaded
  *   - whether `pnpm install --frozen-lockfile` is safe (only in dev, where
  *     we ship our own lockfile; the user's `.deepsec/` may carry a lockfile
@@ -114,15 +114,15 @@ const PROXY_URL = `http://127.0.0.1:${PROXY_PORT}`;
 // Path differs by upload mode (see DeepsecMode):
 //   dev       — uploaded source workspace, proxy lives at its source location
 //   installed — user's `.deepsec/` workspace; after `pnpm install` the deepsec
-//               package is materialized under node_modules/deepsec/, with the
+//               package is materialized under node_modules/@anolilab/deepsec/, with the
 //               proxy script bundled into dist/ by build.mjs.
 const PROXY_SCRIPT_BY_MODE: Record<DeepsecMode, string> = {
   dev: `${DEEPSEC_DIR}/packages/deepsec/src/sandbox/request-proxy.mjs`,
-  installed: `${DEEPSEC_DIR}/node_modules/deepsec/dist/sandbox/request-proxy.mjs`,
+  installed: `${DEEPSEC_DIR}/node_modules/@anolilab/deepsec/dist/sandbox/request-proxy.mjs`,
 };
 const OPENCODE_BINARY_BY_MODE: Record<DeepsecMode, string> = {
   dev: `${DEEPSEC_DIR}/packages/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
-  installed: `${DEEPSEC_DIR}/node_modules/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
+  installed: `${DEEPSEC_DIR}/node_modules/@anolilab/deepsec/node_modules/opencode-ai/bin/opencode.exe`,
 };
 const CODEX_HOME = "/vercel/sandbox/.codex";
 const OPENCODE_PROVIDER_ENV = "DEEPSEC_OPENCODE_PROVIDER";

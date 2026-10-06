@@ -44,7 +44,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 const ROOT = path.resolve(import.meta.dirname, "..");
 const FIXTURES = path.join(ROOT, "fixtures/vulnerable-app");
 
-// We invoke the bundle through `tmp/node_modules/deepsec/dist/cli.mjs`
+// We invoke the bundle through `tmp/node_modules/@anolilab/deepsec/dist/cli.mjs`
 // (a symlink chain back to the source package) WITH
 // `--preserve-symlinks-main`. That keeps `import.meta.url` at the
 // node_modules path, so `resolveDeepsecAppContext` picks
@@ -52,7 +52,7 @@ const FIXTURES = path.join(ROOT, "fixtures/vulnerable-app");
 // would be the source repo (a git checkout), and `makeTarball`'s git
 // branch would tarball ROOT itself, which is not what real users do
 // AND tickles a tar arg-order interaction in CI's GNU tar.
-const BUNDLE_REL = "node_modules/deepsec/dist/cli.mjs";
+const BUNDLE_REL = "node_modules/@anolilab/deepsec/dist/cli.mjs";
 
 // Opt-in flag plus a sandbox-credential check so a typo doesn't burn
 // 30s spinning up a sandbox that can't authenticate.
@@ -134,8 +134,8 @@ function injectStubPlugin(configPath: string): void {
   const original = fs.readFileSync(configPath, "utf-8");
   const patched = original
     .replace(
-      'import { defineConfig } from "deepsec/config";\n',
-      'import { defineConfig } from "deepsec/config";\nimport stubPlugin from "./stub-plugin.mjs";\n',
+      'import { defineConfig } from "@anolilab/deepsec/config";\n',
+      'import { defineConfig } from "@anolilab/deepsec/config";\nimport stubPlugin from "./stub-plugin.mjs";\n',
     )
     .replace(/plugins:\s*\[/, "plugins: [stubPlugin, ");
   if (patched === original) {

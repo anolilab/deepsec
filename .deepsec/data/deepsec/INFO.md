@@ -3,7 +3,7 @@
 ## What this codebase is
 
 deepsec is a developer CLI — a TypeScript pnpm monorepo shipping the `deepsec`
-binary plus the `deepsec/config` sub-export. A developer runs `deepsec scan` /
+binary plus the `@anolilab/deepsec/config` sub-export. A developer runs `deepsec scan` /
 `process` from a `.deepsec/` workspace inside their own repo to find security
 issues with regex matchers + an AI agent (Claude Agent SDK or Codex SDK).
 Optional fan-out to Vercel Sandbox microVMs for scaling. **No HTTP server, no

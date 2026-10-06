@@ -11,7 +11,7 @@ packages/
   core/        Types, schemas, plugin contracts, config loader (defineConfig)
   scanner/     Regex matchers + scanning engine
   processor/   AI agent integration (Claude Agent SDK, Codex SDK), enrich, triage, revalidate
-  deepsec/      Publishable package: bundled CLI + the `deepsec/config` sub-export + the @vercel/sandbox executor
+  deepsec/      Publishable package: bundled CLI + the `@anolilab/deepsec/config` sub-export + the @vercel/sandbox executor
 e2e/           End-to-end tests
 ```
 
@@ -36,7 +36,7 @@ messages, PR titles and descriptions, and issues.
 ## Patterns to keep in mind
 
 - Plugin contracts live in `packages/core/src/plugin.ts`. Internals route
-  through `getRegistry()` from `deepsec/config` rather than calling
+  through `getRegistry()` from `@anolilab/deepsec/config` rather than calling
   organization-specific code directly.
 - The CLI auto-loads `deepsec.config.{ts,mjs,js,cjs}` from cwd upward
   (via `packages/deepsec/src/load-config.ts`, jiti).

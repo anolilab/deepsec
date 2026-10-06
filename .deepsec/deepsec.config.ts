@@ -1,4 +1,4 @@
-import { type DeepsecPlugin, defineConfig } from "deepsec/config";
+import { type DeepsecPlugin, defineConfig } from "@anolilab/deepsec/config";
 import { archiveExtractionUntrusted } from "./matchers/archive-extraction-untrusted.js";
 
 const deepsecPlugin: DeepsecPlugin = {

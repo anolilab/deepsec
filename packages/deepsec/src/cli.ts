@@ -77,7 +77,7 @@ program
     `
 Quickstart:
   cd <your-repo>                 first, in the codebase you want to scan
-  npx deepsec init               install, connect, model, scan, process
+  npx @anolilab/deepsec init               install, connect, model, scan, process
 
   See \`deepsec init --help\` and the docs at:
     https://github.com/vercel/deepsec`,
@@ -138,15 +138,15 @@ surface inventory, checks scan coverage, safely generates narrow matchers when
 needed, and starts processing. Re-run the command to resume from checkpoints.
 
 Examples:
-  $ npx deepsec init                          # most common — from your repo root
-  $ npx deepsec init --plan --output json     # read-only agent/CI plan
-  $ npx deepsec init --yes --model-profile value --output jsonl
-  $ npx deepsec init --scaffold-only          # files only; manual legacy flow
-  $ npx deepsec init --package-manager npm    # use npm in the isolated workspace
-  $ MY_KEY=... npx deepsec init --agent codex --model-auth direct --ai-provider openai --ai-api-key-env MY_KEY
-  $ npx deepsec init --model-auth local       # machine-wide claude/codex logins; no API key
-  $ npx deepsec init audits ../my-app         # custom workspace + target
-  $ npx deepsec init .deepsec . --id my-app   # override the auto-derived id`,
+  $ npx @anolilab/deepsec init                          # most common — from your repo root
+  $ npx @anolilab/deepsec init --plan --output json     # read-only agent/CI plan
+  $ npx @anolilab/deepsec init --yes --model-profile value --output jsonl
+  $ npx @anolilab/deepsec init --scaffold-only          # files only; manual legacy flow
+  $ npx @anolilab/deepsec init --package-manager npm    # use npm in the isolated workspace
+  $ MY_KEY=... npx @anolilab/deepsec init --agent codex --model-auth direct --ai-provider openai --ai-api-key-env MY_KEY
+  $ npx @anolilab/deepsec init --model-auth local       # machine-wide claude/codex logins; no API key
+  $ npx @anolilab/deepsec init audits ../my-app         # custom workspace + target
+  $ npx @anolilab/deepsec init .deepsec . --id my-app   # override the auto-derived id`,
   )
   .action(
     (workspace: string | undefined, targetRoot: string | undefined, opts: Record<string, any>) =>

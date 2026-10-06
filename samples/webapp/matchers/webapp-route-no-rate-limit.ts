@@ -1,4 +1,4 @@
-import type { CandidateMatch, MatcherPlugin } from "deepsec/config";
+import type { CandidateMatch, MatcherPlugin } from "@anolilab/deepsec/config";
 
 /**
  * API route handlers that don't go through the `withRateLimit(...)`

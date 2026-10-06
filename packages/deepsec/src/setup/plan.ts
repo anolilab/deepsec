@@ -150,7 +150,7 @@ export async function buildSetupPlan(options: {
         fs.existsSync(path.join(workspaceDir, "data", options.projectId, "project.json")),
     },
     install: {
-      required: !fs.existsSync(path.join(workspaceDir, "node_modules", "deepsec")),
+      required: !fs.existsSync(path.join(workspaceDir, "node_modules", "@anolilab", "deepsec")),
       packageManager: plannedPackageManager(projectRoot, options.packageManager),
     },
     vercel: {

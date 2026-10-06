@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="deepsec">
+  <!-- deepsec — scan mark: a shield outline with a sweep line (dark theme) -->
+  <g fill="none" stroke="#f4f4f5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <!-- shield -->
+    <path d="M120 26 L196 56 V124 C196 172 163 200 120 214 C77 200 44 172 44 124 V56 Z" />
+  </g>
+  <g stroke="#f4f4f5" stroke-width="14" stroke-linecap="round">
+    <!-- sweep -->
+    <line x1="78" y1="104" x2="162" y2="104" />
+    <line x1="78" y1="136" x2="128" y2="136" />
+    <!-- pip: the finding -->
+    <circle cx="162" cy="136" r="14" fill="#f4f4f5" stroke="none" />
+  </g>
+</svg>
