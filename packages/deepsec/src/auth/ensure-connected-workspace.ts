@@ -233,9 +233,7 @@ export async function ensureConnectedWorkspace(
   };
 
   return {
-    ...(platform
-      ? { platformAuth: { method: platform.method }, project: platform.project }
-      : {}),
+    ...(platform ? { platformAuth: { method: platform.method }, project: platform.project } : {}),
     modelAuth: normalizedRoute,
     agentTypes: [...options.agentTypes],
     modelRouteVerified: true,

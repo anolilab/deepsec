@@ -4,7 +4,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AgentPolicyRefusalError,
-  attributionHeaders,  buildInvestigateFieldRepairPrompt,
+  attributionHeaders,
+  buildInvestigateFieldRepairPrompt,
   buildInvestigateJsonRepairPrompt,
   buildRevalidateJsonRepairPrompt,
   classifyPolicyRefusal,

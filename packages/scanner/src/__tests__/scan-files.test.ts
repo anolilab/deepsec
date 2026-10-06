@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { defineConfig, loadAllFileRecords, readFileRecord, readRunMeta, setLoadedConfig } from "@deepsec/core";
+import {
+  defineConfig,
+  loadAllFileRecords,
+  readFileRecord,
+  readRunMeta,
+  setLoadedConfig,
+} from "@deepsec/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { scanFiles } from "../index.js";
 
@@ -166,8 +172,8 @@ describe("scanFiles() with config matchers filter", () => {
     const { root, projectId } = makeProject({ "a.ts": "x\n" });
     setLoadedConfig(defineConfig({ projects: [], matchers: { exclude: ["no-such-matcher"] } }));
 
-    await expect(
-      scanFiles({ projectId, root, filePaths: ["a.ts"] }),
-    ).rejects.toThrow(/Unknown matcher slug in config matchers: no-such-matcher/);
+    await expect(scanFiles({ projectId, root, filePaths: ["a.ts"] })).rejects.toThrow(
+      /Unknown matcher slug in config matchers: no-such-matcher/,
+    );
   });
 });

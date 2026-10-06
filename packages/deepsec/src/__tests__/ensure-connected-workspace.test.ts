@@ -136,9 +136,7 @@ describe("ensureConnectedWorkspace", () => {
       },
     });
     // Attempted a silent (non-interactive) link, never a prompted login.
-    expect(ensureLink).toHaveBeenCalledWith(
-      expect.objectContaining({ interactive: false }),
-    );
+    expect(ensureLink).toHaveBeenCalledWith(expect.objectContaining({ interactive: false }));
     expect(resolveRoute).toHaveBeenCalledOnce();
     expect(verifyModelRoute).toHaveBeenCalledOnce();
     expect(env.OPENAI_API_KEY).toBe("secret");
