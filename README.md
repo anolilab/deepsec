@@ -42,6 +42,18 @@ It is configured to use the best models at maximum thinking levels (tunable via 
 
 For large codebases, work fans out across worker machines in parallel. If a run is interrupted or errors out partway through, just re-run the same command — deepsec picks up where it left off, skipping files it already analyzed and only investigating the rest.
 
+## What's improved vs. the original
+
+This fork builds on [vercel-labs/deepsec](https://github.com/vercel-labs/deepsec) and adds:
+
+- **OpenCode as an agent backend (`--agent opencode`).** Both OpenCode runtime generations work — v1 (npm `opencode-ai` 1.x, bundled for sandbox workers) and the new **OpenCode v2** (2.0.x), detected automatically at startup. The v2 runtime cannot be driven by the published SDK (a different API surface under `/api/…`, mandatory basic auth, an async prompt/wait inbox), so the backend speaks both protocols itself. Every batch runs in a private, password-secured OpenCode server with a read-only agent — only `read`, `glob`, `grep`, and `list`; shell, edits, network tools, subagents, external directories, LSP, and skills are denied. Works for `process`, `revalidate`, and the one-shot `init` repository analysis.
+- **Vercel AI Gateway on the OpenCode backend.** On the v2 runtime, the native `vercel/` provider takes one `AI_GATEWAY_API_KEY` for every model behind the gateway (`--model vercel/anthropic/claude-opus-4-8`). The standard gateway credential expansion also keeps working — it is translated into v2 provider `baseURL` overlays, with the bearer token bridged to the `x-api-key` form the v2 anthropic provider reads.
+- **No Vercel account needed for your own key.** `init --model-auth direct` no longer prompts for a Vercel login (upstream issue #164): the platform link — which only enables the optional Vercel Sandbox distribution — is reused silently when Vercel credentials exist and skipped otherwise, while your provider key is still resolved and verified.
+- **Config matcher filtering works.** `matchers: { only, exclude }` in `deepsec.config.ts` is honored by `scan` (upstream issue #36); unknown slugs in the config fail loud instead of being silently ignored.
+- **Your Codex subscription is respected.** A `codex login` subscription wins over a stray `OPENAI_API_KEY` in the environment — matching the codex CLI's own precedence — unless explicit gateway/base-URL routing is configured (upstream issue #32).
+- **Nine upstream fix MRs merged** that repair open issues left sitting upstream: severity ordering (#48/#61), unknown `--matchers` slugs (#34/#75), triage data in exports (#64/#71), triage verdict matching (#118/#119), unparseable triage output (#120/#121), token-metrics table layout (#135/#149), non-coherent host mounts (#159/#160), provider policy refusals parsed as findings (#92/#137), and macOS test flakiness (#51/#50). Upstream issues #30, #29, #33, and #91 were verified as already fixed in current main.
+- **Published as `@anolilab/deepsec`** with the same `deepsec` CLI and release automation via npm trusted publishing — no tokens in CI.
+
 ## Quick start
 
 From the root of the repository you want to scan:
