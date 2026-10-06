@@ -3,7 +3,7 @@
 [`deepsec`](https://deepsec.sh) is an agent-powered vulnerability scanner that you can run in your own infrastructure, optimized to perform on-demand review of all code in existing 
 large-scale repos.
 
-`deepsec` is designed to surface hard-to-find issues that have been lurking in applications for a long time. It is configured to use the best models at maximum thinking levels (tunable via `--thinking-level`, see [models](https://github.com/vercel-labs/deepsec/blob/main/docs/models.md)), meaning scans can cost thousands or even tens-of-thousands of dollars for large codebases. Our customers have found the cost worth it for how quickly they were able to patch vulnerabilities that would have otherwise gone unfixed.
+`deepsec` is designed to surface hard-to-find issues that have been lurking in applications for a long time. It is configured to use the best models at maximum thinking levels (tunable via `--thinking-level`, see [models](docs/models.md)), meaning scans can cost thousands or even tens-of-thousands of dollars for large codebases. Our customers have found the cost worth it for how quickly they were able to patch vulnerabilities that would have otherwise gone unfixed.
 
 For large codebases, work fans out across worker machines in parallel.
 If a run is interrupted or errors out partway through, just re-run the same
@@ -56,7 +56,7 @@ pnpm deepsec revalidate  # optional, cuts false-positive rate
 pnpm deepsec export --format md-dir --out ./findings
 ```
 
-The [getting started guide](https://github.com/vercel-labs/deepsec/blob/main/docs/getting-started.md)
+The [getting started guide](docs/getting-started.md)
 covers all of this in more detail, including using your own OpenAI or
 Anthropic API key and running from CI or a coding agent.
 
@@ -67,36 +67,87 @@ installed CLI at `.deepsec/node_modules/deepsec/SKILL.md` and
 `.deepsec/node_modules/deepsec/dist/docs/`. Setup errors expose these as
 absolute machine-readable paths.
 
-- [Getting started](https://github.com/vercel-labs/deepsec/blob/main/docs/getting-started.md) — set up and run your first scan
-- [Reviewing changes](https://github.com/vercel-labs/deepsec/blob/main/docs/reviewing-changes.md) — `process --diff` and CI gating
-- [Supported technology](https://github.com/vercel-labs/deepsec/blob/main/docs/supported-tech.md) — built-in coverage
-- [Generated and hand-authored matchers](https://github.com/vercel-labs/deepsec/blob/main/docs/writing-matchers.md)
-- [Configuration](https://github.com/vercel-labs/deepsec/blob/main/docs/configuration.md)
-- [Plugins](https://github.com/vercel-labs/deepsec/blob/main/docs/plugins.md)
-- [Models](https://github.com/vercel-labs/deepsec/blob/main/docs/models.md)
-- [Project link and credentials](https://github.com/vercel-labs/deepsec/blob/main/docs/vercel-setup.md)
-- [Architecture](https://github.com/vercel-labs/deepsec/blob/main/docs/architecture.md)
-- [Data layout](https://github.com/vercel-labs/deepsec/blob/main/docs/data-layout.md)
-- [FAQ](https://github.com/vercel-labs/deepsec/blob/main/docs/faq.md)
-- [Samples](https://github.com/vercel-labs/deepsec/tree/main/samples)
-- [Contributing](https://github.com/vercel-labs/deepsec/blob/main/CONTRIBUTING.md)
+- [Getting started](docs/getting-started.md) — set up and run your first scan
+- [Reviewing changes](docs/reviewing-changes.md) — `process --diff` and CI gating
+- [Supported technology](docs/supported-tech.md) — built-in coverage
+- [Generated and hand-authored matchers](docs/writing-matchers.md)
+- [Configuration](docs/configuration.md)
+- [Plugins](docs/plugins.md)
+- [Models](docs/models.md) — agent backends, thinking levels, credentials
+- [Project link and credentials](docs/vercel-setup.md)
+- [Architecture](docs/architecture.md)
+- [Data layout](docs/data-layout.md)
+- [FAQ](docs/faq.md)
+- [Samples](samples)
+- [Contributing](CONTRIBUTING.md)
+
+## AI agents
+
+The AI review runs through an interchangeable agent backend, selected with
+`--agent` (or `defaultAgent` in `deepsec.config.ts`). Same prompt, same JSON
+output contract — you can mix backends within a repo and compare models
+under the same workload.
+
+| Backend | SDK | Default model |
+|---|---|---|
+| `codex` (default) | `@openai/codex-sdk` | `gpt-5.5` |
+| `claude` | `@anthropic-ai/claude-agent-sdk` | `claude-opus-4-8` |
+| `opencode` | `@opencode-ai/sdk/v2` + `opencode` runtime | `anthropic/claude-opus-4-8` |
+| `pi` | `@earendil-works/pi-coding-agent` | `zai/glm-5.2` |
+
+```bash
+pnpm deepsec process --project-id my-app --agent claude
+pnpm deepsec process --project-id my-app --agent opencode --model anthropic/claude-opus-4-8
+```
+
+### OpenCode backend
+
+The `opencode` backend speaks both OpenCode runtime generations — the v1
+runtime (npm `opencode-ai` 1.x, also bundled for sandbox workers) and the new
+**OpenCode v2** (2.0.x) — detected automatically at startup, so it works
+with whatever `opencode` you have installed. Each batch runs in a private,
+password-secured OpenCode server with a read-only agent: only `read`,
+`glob`, `grep`, and `list` are allowed; shell, edits, network tools,
+subagents, external directories, LSP, and skills are denied.
+
+For a local run without environment credentials, connect a provider first
+(run `opencode`, then use `/connect`) and use its `provider/model` id:
+
+```bash
+pnpm deepsec process --project-id my-app \
+  --agent opencode \
+  --model openai/gpt-5.5
+```
+
+Through the Vercel AI Gateway, the v2 runtime also accepts the native
+`vercel/` provider — one `AI_GATEWAY_API_KEY` covers every model behind the
+gateway:
+
+```bash
+AI_GATEWAY_API_KEY=vck_… pnpm deepsec process --project-id my-app \
+  --agent opencode \
+  --model vercel/anthropic/claude-opus-4-8
+```
+
+See [models](docs/models.md) for the full backend reference, thinking
+levels, and credential routing.
 
 ## AI provider
 
 By default, deepsec routes model calls through Vercel AI Gateway, which
-gives access to every major model without provider-specific keys. You can
-instead bring your own key — OpenAI, Anthropic, or a custom HTTPS
-provider — by passing `--model-auth direct` with `--ai-provider` and
-`--ai-api-key-env` to `init`; no Vercel account is needed in that mode.
-Deepsec only ever stores the *name* of the environment variable holding
-your key, never the key itself. See
-[project link and credentials](https://github.com/vercel-labs/deepsec/blob/main/docs/vercel-setup.md)
+gives access to every major model without provider-specific keys — one
+`AI_GATEWAY_API_KEY` covers every agent backend above. You can instead
+bring your own key — OpenAI, Anthropic, or a custom HTTPS provider — by
+passing `--model-auth direct` with `--ai-provider` and `--ai-api-key-env`
+to `init`; no Vercel account is needed in that mode. Deepsec only ever
+stores the *name* of the environment variable holding your key, never the
+key itself. See
+[project link and credentials](docs/vercel-setup.md)
 for the full reference.
 
-When running locally, `deepsec` can also reuse existing Claude, Codex, Pi, or
-OpenCode provider authentication — including a local `opencode` CLI login
-(`opencode` → `/connect`) — for evaluation-scale scans.
-
+When running locally, `deepsec` can also reuse existing Claude, Codex, Pi,
+or OpenCode provider authentication — including a local `opencode` CLI
+login (`opencode` → `/connect`) — for evaluation-scale scans.
 
 If a `process` or `revalidate` run halts because the upstream credential
 ran out of quota or credits, deepsec stops gracefully and tells you

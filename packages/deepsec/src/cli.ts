@@ -92,7 +92,10 @@ program
   .option("--scaffold-only", "Only create files; do not install, connect, scan, or process")
   .option("--skip-install", "Require dependencies to exist instead of running pnpm/npm install")
   .option("--package-manager <name>", "Installer to use: pnpm or npm", parsePackageManager)
-  .option("--agent <type>", "AI agent: codex, claude, or pi")
+  .option(
+    "--agent <type>",
+    "AI agent: codex, claude, opencode, or pi (opencode requires an explicit --model)",
+  )
   .option("--model <model>", "Model for repository analysis and processing")
   .option("--model-profile <profile>", "Benchmark profile: best, value, or budget")
   .option("--thinking-level <level>", "Reasoning effort: minimal, low, medium, high, or xhigh")
@@ -187,7 +190,10 @@ program
   .option("--status", "Show resumable phase status without running setup")
   .option("--skip-install", "Require dependencies to exist instead of running pnpm/npm install")
   .option("--package-manager <name>", "Installer to use: pnpm or npm", parsePackageManager)
-  .option("--agent <type>", "AI agent: codex, claude, or pi")
+  .option(
+    "--agent <type>",
+    "AI agent: codex, claude, opencode, or pi (opencode requires an explicit --model)",
+  )
   .option("--model <model>", "Model for repository analysis and processing")
   .option("--model-profile <profile>", "Benchmark profile: best, value, or budget")
   .option("--thinking-level <level>", "Reasoning effort: minimal, low, medium, high, or xhigh")
