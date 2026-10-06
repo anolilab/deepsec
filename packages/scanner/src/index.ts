@@ -7,6 +7,7 @@ import {
   createRunMeta,
   dataDir,
   ensureProject,
+  getConfig,
   getDataRoot,
   getRegistry,
   projectConfigSchema,
@@ -102,6 +103,42 @@ function buildMergedRegistry(): MatcherRegistry {
     registry.register(m);
   }
   return registry;
+}
+
+/**
+ * Resolve the effective matcher slug list for a scan, combining the
+ * caller's explicit `matcherSlugs` (CLI `--matchers`) with the config's
+ * `matchers: { only, exclude }` filter (deepsec.config.ts).
+ *
+ * Precedence:
+ *   1. Explicit `matcherSlugs` names the exact set — config `only`/`exclude`
+ *      do not apply. An explicit per-invocation choice beats ambient config.
+ *   2. Otherwise `only` narrows the registry to the listed slugs.
+ *   3. `exclude` removes slugs from whatever remains.
+ *
+ * Returns `undefined` when nothing filters — callers then use the full
+ * registry. Unknown slugs in `only`/`exclude` fail loud (same contract as
+ * `--matchers`) so a typo can't silently widen the run.
+ */
+function applyConfigMatcherFilter(
+  registry: MatcherRegistry,
+  matcherSlugs: string[] | undefined,
+): string[] | undefined {
+  if (matcherSlugs) return matcherSlugs;
+  const filter = getConfig()?.matchers;
+  if (!filter || (!filter.only && !filter.exclude)) return undefined;
+  const selected = filter.only ? [...filter.only] : registry.slugs();
+  const excluded = filter.exclude ?? [];
+  const unknown = registry.unknownSlugs([...selected, ...excluded]);
+  if (unknown.length > 0) {
+    throw new Error(
+      `Unknown matcher slug${unknown.length > 1 ? "s" : ""} in config matchers: ${unknown.join(", ")}.\n` +
+        `  Available matchers: ${registry.slugs().sort().join(", ")}`,
+    );
+  }
+  const excludeSet = new Set(excluded);
+  const effective = selected.filter((slug) => !excludeSet.has(slug));
+  return effective;
 }
 
 /** Returns the noise tier for a given vulnSlug. Defaults to "normal". */
@@ -447,8 +484,12 @@ export async function scan(params: {
 }> {
   const registry = buildMergedRegistry();
 
-  if (params.matcherSlugs) {
-    const unknown = registry.unknownSlugs(params.matcherSlugs);
+  // Config `matchers.only/exclude` narrows the set unless the caller named
+  // the exact matchers explicitly. Unknown slugs in either place fail loud.
+  const effectiveMatcherSlugs = applyConfigMatcherFilter(registry, params.matcherSlugs);
+
+  if (effectiveMatcherSlugs) {
+    const unknown = registry.unknownSlugs(effectiveMatcherSlugs);
     if (unknown.length > 0) {
       throw new Error(
         `Unknown matcher slug${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}.\n` +
@@ -457,8 +498,8 @@ export async function scan(params: {
     }
   }
 
-  const allSelected = params.matcherSlugs
-    ? registry.getBySlugs(params.matcherSlugs)
+  const allSelected = effectiveMatcherSlugs
+    ? registry.getBySlugs(effectiveMatcherSlugs)
     : registry.getAll();
 
   if (allSelected.length === 0) {
@@ -643,8 +684,12 @@ export async function scanFiles(params: {
 }> {
   const registry = buildMergedRegistry();
 
-  if (params.matcherSlugs) {
-    const unknown = registry.unknownSlugs(params.matcherSlugs);
+  // Config `matchers.only/exclude` narrows the set unless the caller named
+  // the exact matchers explicitly. Unknown slugs in either place fail loud.
+  const effectiveMatcherSlugs = applyConfigMatcherFilter(registry, params.matcherSlugs);
+
+  if (effectiveMatcherSlugs) {
+    const unknown = registry.unknownSlugs(effectiveMatcherSlugs);
     if (unknown.length > 0) {
       throw new Error(
         `Unknown matcher slug${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}.\n` +
@@ -653,8 +698,8 @@ export async function scanFiles(params: {
     }
   }
 
-  const allSelected = params.matcherSlugs
-    ? registry.getBySlugs(params.matcherSlugs)
+  const allSelected = effectiveMatcherSlugs
+    ? registry.getBySlugs(effectiveMatcherSlugs)
     : registry.getAll();
 
   if (allSelected.length === 0) {

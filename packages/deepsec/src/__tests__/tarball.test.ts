@@ -223,7 +223,9 @@ describe("extractTarballLocally — strict allowlist", () => {
     expect("files/../etc/passwd.json".split("/").includes("..")).toBe(true);
   });
 
-  it("skips an oversized entry but extracts the rest of the tarball", async () => {
+  // The 64MiB random-byte fixture plus tar+extract trips vitest's default
+  // 5s timeout on slower machines and under parallel collection (#51).
+  it("skips an oversized entry but extracts the rest of the tarball", { timeout: 30_000 }, async () => {
     const projectId = path.basename(destDir);
     const src = fs.mkdtempSync(path.join(os.tmpdir(), "deepsec-tar-fat-"));
     fs.mkdirSync(path.join(src, "files"));

@@ -267,12 +267,16 @@ export async function initCommand(opts: InitOpts) {
     // avoids transferring stdin between two independent prompt runtimes.
     //
     // A local-subscription route needs no platform link, so skip it rather
-    // than prompt for the Vercel login the user just declined. On resume the
-    // route comes from the login checkpoint, or from the generated config when
-    // setup was interrupted before login; the prompt above is first-run only.
+    // than prompt for the Vercel login the user just declined. Direct and
+    // custom routes likewise carry their own provider credential — the
+    // platform link only enables the optional Vercel Sandbox, so it is set
+    // up silently later if credentials exist, never prompted here (#164).
+    // On resume the route comes from the login checkpoint, or from the
+    // generated config when setup was interrupted before login; the prompt
+    // above is first-run only.
     const linkRoute = modelRoute ?? persistedModelRoute(workspaceDir, registered.id);
     if (
-      linkRoute?.mode !== "local" &&
+      (linkRoute?.mode ?? "gateway") === "gateway" &&
       !headless &&
       process.stdin.isTTY &&
       process.stdout.isTTY &&

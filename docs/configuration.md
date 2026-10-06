@@ -166,6 +166,7 @@ requires the complete access-token triple.
 |---|---|---|
 | `AI_GATEWAY_API_KEY` | Gateway route | Optional long-lived alternative to linked-project OIDC. Expanded for the selected agent (Claude, Codex, OpenCode, or Pi). |
 | `ANTHROPIC_AUTH_TOKEN` | `process`, `revalidate`, `triage` (Claude or OpenCode Anthropic backend) | API token for the Claude Agent SDK or the OpenCode Anthropic provider. AI Gateway-issued or Anthropic-issued. Set this if you don't use `AI_GATEWAY_API_KEY`. |
+| `ANTHROPIC_API_KEY` | same | Direct-Anthropic credential (`x-api-key` broker contract). Prefer this over `ANTHROPIC_AUTH_TOKEN` when pointing directly at `https://api.anthropic.com` — some tooling rejects bearer-style tokens from that endpoint. |
 | `ANTHROPIC_BASE_URL` | same | Default (when `AI_GATEWAY_API_KEY` is set): `https://ai-gateway.vercel.sh`. Set to `https://api.anthropic.com` for direct Anthropic. |
 | `<ai.apiKeyEnv>` | Direct/custom route | User-chosen variable containing the provider credential. The name is stored in config; the value comes from `.env.local` or the process. |
 
