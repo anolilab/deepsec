@@ -12,6 +12,7 @@ import {
   writeFileRecord,
   writeRunMeta,
 } from "@deepsec/core";
+import { parseAgentJsonArray, writeParseFailureDebug } from "./agents/shared.js";
 
 const TRIAGE_BATCH_SIZE = 30;
 
@@ -199,12 +200,30 @@ matched back to the exact finding it judged (titles are not unique).
         }
       }
 
-      const jsonMatch = resultText.match(/```json\s*([\s\S]*?)```/);
-      const jsonStr = jsonMatch ? jsonMatch[1].trim() : resultText.trim();
-      let verdicts: TriageVerdict[] = [];
+      // Reuse the project's tolerant parse + fail-loud path (jsonrepair,
+      // then throw on unrecoverable output). A bare `JSON.parse` swallowed in
+      // a catch left `verdicts = []`, so a trailing comma or truncated array
+      // silently dropped the whole batch's triage while still reporting the
+      // batch as a success — indistinguishable from a clean "nothing to do".
+      let verdicts: TriageVerdict[];
       try {
-        verdicts = JSON.parse(jsonStr);
-      } catch {}
+        verdicts = parseAgentJsonArray({
+          resultText,
+          parseFailurePrefix: "Triage output wasn't a parseable JSON verdict array",
+          nonArrayMessage: (parsed) =>
+            `Triage output was JSON but not an array of verdicts. Got: ${typeof parsed}`,
+        }) as TriageVerdict[];
+      } catch (parseErr) {
+        writeParseFailureDebug({
+          projectId,
+          phase: "revalidate",
+          agentType: "triage",
+          resultText,
+          error: parseErr,
+          batch: batch.map((b) => b.record),
+        });
+        throw parseErr; // surface to the outer catch so the batch is marked failed, not silently empty
+      }
 
       // Match verdicts back to findings by the 1-based ID emitted in the
       // prompt, not by title: titles are free-text and recur across a batch,
