@@ -24,10 +24,13 @@
   "ignore": ["fixtures/vulnerable-app/**", "samples/**", ".deepsec/**", "packages/deepsec/dist/**"],
   "ignoreDependencies": [
     "@anthropic-ai/claude-agent-sdk",
+    "@anolilab/semantic-release-pnpm",
+    "@anolilab/semantic-release-preset",
     "@earendil-works/pi-coding-agent",
     "@openai/codex",
     "@openai/codex-sdk",
     "@opencode-ai/sdk",
+    "@visulima/yaml",
     "opencode-ai",
     "undici"
   ],

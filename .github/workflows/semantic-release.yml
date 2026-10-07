@@ -1,0 +1,104 @@
+name: Semantic Release
+
+# Publishes `@anolilab/deepsec` with semantic-release (single package, house
+# config: packages/deepsec/.releaserc.json extends
+# @anolilab/semantic-release-preset/pnpm). Version bump, CHANGELOG.md, the git
+# tag, and the GitHub release are all derived from conventional commits on
+# main; docs-only pushes exit without doing anything.
+#
+# Publishing auth, checked in this order by @anolilab/semantic-release-pnpm:
+#
+#   1. OIDC trusted publishing (provenance attestation included automatically)
+#      — active once a Trusted Publisher is configured on npmjs.com for this
+#      repo + this workflow. One-time setup, requires the package to exist on
+#      npm first:
+#        https://www.npmjs.com/package/@anolilab/deepsec/access
+#          Organization or user:  anolilab
+#          Repository:            deepsec
+#          Workflow filename:     semantic-release.yml
+#          Environment name:      (leave blank — this job does not use one)
+#
+#   2. NPM_TOKEN environment variable (repo secret), if OIDC is unavailable.
+#
+# Bootstrap for the very first release (the package does not exist on npm yet,
+# so OIDC cannot be configured up front). Pick one:
+#
+#   a) Add a granular `NPM_TOKEN` repo secret (publish rights on @anolilab)
+#      before merging — the first release publishes 2.4.0 via the token, then
+#      configure the Trusted Publisher and delete the secret if you like.
+#   b) Publish once manually, token-free:
+#        pnpm bundle && pnpm --filter @anolilab/deepsec publish --access public
+#      then configure the Trusted Publisher. semantic-release finds 2.4.0
+#      already on npm, skips the registry write, and still creates the tag,
+#      changelog, and GitHub release.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Serialize releases: two pushes landing on main back-to-back must not race
+# each other into tag/publish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-release:
+    name: Semantic Release
+    # Never run a release from a fork of this repository.
+    if: github.repository == 'anolilab/deepsec'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Deliberately no `environment:` — an npm Trusted Publisher configured
+    # without an environment name rejects OIDC tokens that carry an
+    # environment claim. Add one here (and mirror it on npmjs.com) if you
+    # ever want environment-scoped secrets or required reviewers.
+    permissions:
+      contents: write # push the release commit + tag, create the GitHub release
+      issues: write # comment on released issues
+      pull-requests: write # comment on released pull requests
+      id-token: write # OIDC trusted publishing + provenance
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # semantic-release needs the full history and every tag to find the
+          # last release and analyze the commits since it.
+          fetch-depth: 0
+
+      # pnpm version comes from `packageManager` in the root package.json.
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Fail before semantic-release starts mutating anything (changelog,
+      # release commit, tag) if the tip doesn't build, lint, or test green.
+      # The package's prepublishOnly hook runs the same gate again inside
+      # `pnpm publish` — this copy just moves the failure ahead of the git
+      # operations.
+      - run: pnpm validate
+
+      # dist/ + README.md are what gets published (prepack regenerates them
+      # again during publish; building here surfaces bundle errors before a
+      # release is tagged).
+      - run: pnpm bundle
+
+      - name: Semantic release
+        working-directory: packages/deepsec
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions-shell
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions-shell
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: pnpm exec semantic-release
