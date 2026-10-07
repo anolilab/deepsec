@@ -42,10 +42,10 @@ function installHandlers(): void {
       s
         .stop()
         .then(() => {
-          process.stderr.write(`  stopped ${s.sandboxId}\n`);
+          process.stderr.write(`  stopped ${s.name}\n`);
         })
         .catch((err) => {
-          process.stderr.write(`  stop failed ${s.sandboxId}: ${err?.message ?? err}\n`);
+          process.stderr.write(`  stop failed ${s.name}: ${err?.message ?? err}\n`);
         }),
     );
 
