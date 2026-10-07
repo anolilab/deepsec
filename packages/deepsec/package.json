@@ -1,6 +1,6 @@
 {
   "name": "@anolilab/deepsec",
-  "version": "2.4.0",
+  "version": "2.3.10",
   "description": "AI-powered vulnerability scanner for any codebase",
   "license": "Apache-2.0",
   "repository": {
@@ -24,7 +24,8 @@
     "README.md",
     "LICENSE",
     "NOTICE",
-    "SKILL.md"
+    "SKILL.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsc --noEmit",
@@ -49,13 +50,17 @@
     "undici": "^8.11.2"
   },
   "devDependencies": {
+    "@anolilab/semantic-release-pnpm": "^8.1.32",
+    "@anolilab/semantic-release-preset": "^13.4.34",
     "@deepsec/core": "workspace:*",
     "@deepsec/processor": "workspace:*",
     "@deepsec/scanner": "workspace:*",
     "@types/react": "^19.3.0",
+    "@visulima/yaml": "^1.0.0",
     "commander": "^15.0.0",
     "dotenv": "^18.0.6",
     "dts-bundle-generator": "^9.5.1",
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "semantic-release": "^25.0.9"
   }
 }
