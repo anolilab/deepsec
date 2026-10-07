@@ -16,7 +16,7 @@ name: Semantic Release
 #          Organization or user:  anolilab
 #          Repository:            deepsec
 #          Workflow filename:     semantic-release.yml
-#          Environment name:      (leave blank — this job does not use one)
+#          Environment name:      release  (mirrors `environment:` below)
 #
 #   2. NPM_TOKEN environment variable (repo secret), if OIDC is unavailable.
 #
@@ -52,10 +52,11 @@ jobs:
     if: github.repository == 'anolilab/deepsec'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Deliberately no `environment:` — an npm Trusted Publisher configured
-    # without an environment name rejects OIDC tokens that carry an
-    # environment claim. Add one here (and mirror it on npmjs.com) if you
-    # ever want environment-scoped secrets or required reviewers.
+    # npm matches this against the Trusted Publisher's Environment name,
+    # case-sensitively — both sides must agree or the OIDC token exchange
+    # is rejected. Also the hook point for environment-scoped secrets or
+    # required reviewers later on.
+    environment: release
     permissions:
       contents: write # push the release commit + tag, create the GitHub release
       issues: write # comment on released issues
