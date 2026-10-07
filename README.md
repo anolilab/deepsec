@@ -110,7 +110,7 @@ these as absolute machine-readable paths.
 - [Generated and hand-authored matchers](docs/writing-matchers.md)
 - [Configuration](docs/configuration.md)
 - [Plugins](docs/plugins.md)
-- [Models](docs/models.md) — agent backends, thinking levels, credentials
+- [Models](docs/models.md) — agent backends, thinking levels, credentials, [recommended models & ensemble strategy](docs/models.md#recommended-models--ensemble-strategy)
 - [Project link and credentials](docs/vercel-setup.md)
 - [Architecture](docs/architecture.md)
 - [Data layout](docs/data-layout.md)
@@ -167,7 +167,9 @@ AI_GATEWAY_API_KEY=vck_… pnpm deepsec process --project-id my-app \
 ```
 
 See [models](docs/models.md) for the full backend reference, thinking
-levels, and credential routing.
+levels, credential routing, and the [recommended models & ensemble
+strategy](docs/models.md#recommended-models--ensemble-strategy) for
+maximum issue discovery.
 
 ## AI provider
 

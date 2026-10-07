@@ -62,6 +62,94 @@ one key covers Codex, Claude, OpenCode, and Pi. OpenCode and Pi accept
 provider/model identifiers directly, which makes them useful for comparing
 harness and provider behavior under the same deepsec workload.
 
+## Recommended models & ensemble strategy
+
+The hard truth from [DeepSecBench](https://vercel.com/ai-gateway/leaderboards/deepsecbench/results.json)
+(deepsec's own benchmark corpus of 232 known real vulnerabilities) and the
+academic literature alike (SecVulEval's best agent: 23.8% F1; SecLens: "no
+universal best model"): **no single model finds everything**. The best
+model recovers ~36% of the known issues — so maximum recall is a strategy,
+not a flag.
+
+Three rules, in order of impact:
+
+1. **Always run maximum thinking.** Recall collapses without it — the
+   benchmark leader finds 35.8% of issues at `xhigh` but only 25% at
+   `medium` on the same model.
+2. **Run an ensemble of different model families, then union the
+   findings.** Different training data misses different issues; deepsec is
+   built for this — the same JSON contract across backends, findings
+   accumulate per file, and `revalidate` cuts false positives and dedupes
+   via `duplicate` verdicts.
+3. **Don't pay for the runner-up.** The benchmark leader is also the
+   cheapest top-tier option.
+
+Benchmark snapshot (October 2026) — score is recall-weighted against
+precision on the 232-issue corpus:
+
+| Model | Harness | Thinking | Score | Recall | Precision | Cost/run |
+|---|---|---|---|---|---|---|
+| `gpt-6-sol` | `codex` | `xhigh` | 40.9 | 35.8% | 96.0% | $12.76 |
+| `gpt-6-astra` | `codex` | `xhigh` | 37.8 | 32.8% | 97.9% | $63.70 |
+| `gpt-5.6-sol` | `codex` | `xhigh` | 35.4 | 30.6% | 96.3% | $55.98 |
+| `claude-opus-5` | `claude` | `max` | 32.4 | 28.0% | 88.0% | $127.93 |
+| `gpt-6-luna` | `codex` | `xhigh` | 21.1 | 17.7% | 89.6% | $0.51 |
+
+Successor models that postdate the snapshot (`gpt-6.1-sol`) are typically
+as strong or stronger than their benched predecessor — treat the table as
+a family ranking, not a frozen version list. Check the live leaderboard
+for current numbers.
+
+### The ensemble run
+
+Pick two or three models from *different* families — an OpenAI-reasoning
+model as the anchor, an Anthropic model as the second opinion, and an
+open-weight model (GLM, Kimi, Qwen, Grok, DeepSeek) as the third. Findings
+accumulate across runs; nothing is overwritten:
+
+```bash
+# Pass 1 — anchor: the benchmark-leading family, max thinking
+pnpm deepsec process --project-id my-app \
+  --agent opencode --model opencode/gpt-6.1-sol --thinking-level xhigh
+
+# Pass 2 — second opinion from a different family
+pnpm deepsec process --project-id my-app \
+  --agent opencode --model opencode/claude-opus-5-5 --thinking-level max
+
+# Pass 3 — open-weight third opinion (rarely refuses, different blind spots)
+pnpm deepsec process --project-id my-app \
+  --agent opencode --model opencode/glm-5.3 --thinking-level high
+
+# Union cleanup — revalidate cuts false positives and dedupes the union
+pnpm deepsec revalidate --project-id my-app \
+  --agent opencode --model opencode/gpt-6.1-sol
+```
+
+Through the Vercel AI Gateway the same strategy works with the
+benchmark-exact identifiers: `--agent codex --model gpt-6-sol` for the
+anchor, `--agent claude --model claude-opus-5` for the second opinion.
+
+### Refusals and unrestricted analysis
+
+Some models occasionally refuse to investigate a candidate — usually
+exploit-adjacent source that a safety filter misreads. deepsec never loses
+those files (see [Refusals](#refusals)): refused batches stay `pending`,
+nothing is silently dropped, and the run log shows a ⚠️ marker. In
+practice the GPT-6/GPT-5.6 family and the open-weight models (GLM, Kimi,
+Qwen, Grok, DeepSeek) refuse on well under 1% of batches; if a fully
+unrestricted sweep matters more than family diversity, anchor on those and
+keep the Anthropic pass optional.
+
+### Value and free passes
+
+- `gpt-6-luna` at `xhigh` costs **$0.51** per benchmark run with a
+  mid-pack score — the best cost-per-finding for iterative work.
+- The OpenCode runtime's free models (`opencode/fledge-alpha-free`,
+  `opencode/space-bunny-free`, `opencode/muse-spark-1.3-contributor-free`,
+  `opencode/longcat-2.5-preview-free`, `opencode/nemotron-3.5-lightning-free`)
+  run at **$0** through `--agent opencode` — useful for an unrestricted
+  first sweep before escalating the hits to a top-tier model.
+
 ## CLI selection
 
 ```bash
