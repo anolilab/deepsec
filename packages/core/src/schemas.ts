@@ -80,7 +80,7 @@ export const analysisEntrySchema = z.object({
   durationApiMs: z.number().optional(),
   agentType: z.string(),
   model: z.string(),
-  modelConfig: z.record(z.unknown()),
+  modelConfig: z.record(z.string(), z.unknown()),
   agentSessionId: z.string().optional(),
   findingCount: z.number(),
   numTurns: z.number().optional(),
@@ -262,7 +262,7 @@ export const runMetaSchema = z.object({
     .object({
       agentType: z.string(),
       model: z.string(),
-      modelConfig: z.record(z.unknown()),
+      modelConfig: z.record(z.string(), z.unknown()),
       invocationMode: z.enum(["scan", "direct"]).optional(),
       source: z.string().optional(),
     })

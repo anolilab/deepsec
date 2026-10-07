@@ -33,29 +33,29 @@
     "prepublishOnly": "pnpm -w validate && node -e \"const fs=require('node:fs');for(const f of ['dist/cli.mjs','dist/config.mjs','dist/config.d.ts','dist/sandbox/request-proxy.mjs','dist/docs/getting-started.md','dist/samples/webapp/deepsec.config.ts','SKILL.md','README.md','LICENSE','NOTICE']){if(!fs.existsSync(f)){console.error('Missing: '+f);process.exit(1)}}console.log('Pre-publish checks passed.')\""
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.3.280",
-    "@earendil-works/pi-coding-agent": "0.81.1",
-    "@openai/codex": "^0.156.1",
-    "@openai/codex-sdk": "^0.156.1",
+    "@anthropic-ai/claude-agent-sdk": "^0.3.292",
+    "@earendil-works/pi-coding-agent": "1.0.4",
+    "@openai/codex": "^0.160.1",
+    "@openai/codex-sdk": "^0.160.1",
     "@opencode-ai/sdk": "^1.18.35",
-    "@vercel/oidc": "^3.4.0",
-    "@vercel/sandbox": "^1.9.0",
-    "ink": "^7.1.1",
-    "jiti": "^2.4.0",
-    "minimatch": "^10.0.0",
+    "@vercel/oidc": "^4.0.0",
+    "@vercel/sandbox": "^3.5.1",
+    "ink": "^8.0.0",
+    "jiti": "^2.7.0",
+    "minimatch": "^10.2.6",
     "opencode-ai": "^1.18.35",
-    "react": "^19.2.8",
-    "tar": "^7.5.20",
-    "undici": "^8.5.0"
+    "react": "^19.3.0",
+    "tar": "^7.5.22",
+    "undici": "^8.11.2"
   },
   "devDependencies": {
     "@deepsec/core": "workspace:*",
     "@deepsec/processor": "workspace:*",
     "@deepsec/scanner": "workspace:*",
-    "@types/react": "^19.2.18",
-    "commander": "^13.0.0",
-    "dotenv": "^16.4.0",
+    "@types/react": "^19.3.0",
+    "commander": "^15.0.0",
+    "dotenv": "^18.0.6",
     "dts-bundle-generator": "^9.5.1",
-    "esbuild": "^0.25.12"
+    "esbuild": "^0.28.2"
   }
 }

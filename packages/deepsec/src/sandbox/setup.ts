@@ -387,7 +387,7 @@ export async function createBootstrapSnapshot(opts: BootstrapOptions): Promise<s
     throw new Error(`Sandbox.create failed: ${err?.message ?? String(err)}`);
   }
 
-  opts.onLog(`Bootstrap sandbox ${sandbox.sandboxId} created.`);
+  opts.onLog(`Bootstrap sandbox ${sandbox.name} created.`);
   trackSandbox(sandbox);
 
   try {
@@ -464,7 +464,7 @@ export async function createBootstrapSnapshot(opts: BootstrapOptions): Promise<s
       await sandbox.stop();
     } catch {}
     untrackSandbox(sandbox);
-    opts.onLog(`Bootstrap sandbox ${sandbox.sandboxId} stopped.`);
+    opts.onLog(`Bootstrap sandbox ${sandbox.name} stopped.`);
   }
 }
 

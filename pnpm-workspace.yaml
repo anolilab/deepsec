@@ -1,2 +1,37 @@
 packages:
   - "packages/*"
+
+# Security/compat overrides for transitive dependencies (moved from the
+# package.json `pnpm` field — pnpm 10+ reads them from pnpm-workspace.yaml).
+overrides:
+  undici@>=7.0.0 <7.28.0: ^7.28.0
+  undici@>=8.0.0 <8.10.2: ^8.10.2
+  postcss@<8.5.10: ^8.5.10
+  brace-expansion@>=5.0.0 <5.0.6: ^5.0.6
+  esbuild@>=0.27.3 <0.28.1: ^0.28.1
+  # 1.3.1 calls React.createContext at module scope without "use client",
+  # which crashes Next.js RSC builds; fixed in 1.3.3.
+  "@radix-ui/react-slot@1.3.1": ^1.3.3
+  # GHSA-238p-pmpm-9mq7 (low): mermaid's katex copy behind the docs site.
+  katex@>=0.11.0 <0.18.2: ^0.18.2
+
+# pnpm 10+ requires an explicit build-script ruling for every dependency
+# that has one. These all have standard, safe postinstalls (native binary
+# links from optionalDependencies or codegen no-ops) and ran unconditionally
+# under pnpm 8. sharp is denied: it ships platform binaries as
+# optionalDependencies and its postinstall is only a validation pass.
+allowBuilds:
+  "@google/genai": true
+  esbuild: true
+  opencode-ai: true
+  protobufjs: true
+  unrs-resolver: true
+  sharp: false
+
+# pnpm 12 gates installs on a release-age policy by default. The agent SDKs
+# this project tracks (@anthropic-ai/claude-agent-sdk, @openai/codex-sdk,
+# @opencode-ai/sdk) publish multiple times per day, so an age gate would
+# block every dependency update. The committed lockfile is the actual
+# vetting point here: CI installs with --frozen-lockfile, so every version
+# in it was resolved and reviewed when it was committed.
+minimumReleaseAge: 0

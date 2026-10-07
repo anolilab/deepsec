@@ -8,7 +8,7 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@8.15.9",
+  "packageManager": "pnpm@12.9.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/vercel-labs/deepsec"
@@ -39,22 +39,14 @@
   ],
   "author": "Vercel",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
+    "@biomejs/biome": "^2.5.15",
     "@types/node": "^22.0.0",
-    "knip": "^6.9.0",
-    "tsx": "^4.23.1",
-    "typescript": "^5.7.0",
-    "vitest": "^3.2.7"
+    "knip": "^6.40.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
   },
   "dependencies": {
     "@anolilab/deepsec": "workspace:*"
-  },
-  "pnpm": {
-    "overrides": {
-      "undici@>=7.0.0 <7.28.0": "^7.28.0",
-      "postcss@<8.5.10": "^8.5.10",
-      "brace-expansion@>=5.0.0 <5.0.6": "^5.0.6",
-      "esbuild@>=0.27.3 <0.28.1": "^0.28.1"
-    }
   }
 }

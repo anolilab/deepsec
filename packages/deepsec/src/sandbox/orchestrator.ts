@@ -363,11 +363,11 @@ async function bootstrapAndSpawn(
         allowedHosts: config.allowedHosts,
         onLog: (msg) => onLog(`[sandbox-${idx}] ${msg}`),
       });
-      onLog(`[sandbox-${idx}] Ready (${sandbox.sandboxId}, ${partition.length} files)`);
+      onLog(`[sandbox-${idx}] Ready (${sandbox.name}, ${partition.length} files)`);
       return {
         sandbox,
         index: idx,
-        sandboxId: sandbox.sandboxId,
+        sandboxId: sandbox.name,
         status: "setup",
         manifest: partition,
       };
@@ -509,7 +509,7 @@ export async function checkStatus(
 
   for (const entry of state.sandboxes) {
     try {
-      const sandbox = await Sandbox.get({ sandboxId: entry.sandboxId });
+      const sandbox = await Sandbox.get({ name: entry.sandboxId });
       const cmd = await sandbox.getCommand(entry.cmdId);
 
       if (cmd.exitCode === null) {
@@ -543,7 +543,7 @@ export async function collect(
 
   const resultPromises = state.sandboxes.map(async (entry): Promise<SandboxResult> => {
     try {
-      const sandbox = await Sandbox.get({ sandboxId: entry.sandboxId });
+      const sandbox = await Sandbox.get({ name: entry.sandboxId });
       const cmd = await sandbox.getCommand(entry.cmdId);
 
       if (cmd.exitCode === null) {
@@ -868,7 +868,7 @@ async function runOnSandboxAttached(
       onLog(`[sandbox-${index}] ${config.command} failed (exit ${result.exitCode})`);
       return {
         sandboxIndex: index,
-        sandboxId: sandbox.sandboxId,
+        sandboxId: sandbox.name,
         success: false,
         filesProcessed: 0,
         error: instance.error,
@@ -879,7 +879,7 @@ async function runOnSandboxAttached(
     onLog(`[sandbox-${index}] ${config.command} complete.`);
     return {
       sandboxIndex: index,
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandbox.name,
       success: true,
       filesProcessed: manifest.length,
     };
@@ -890,7 +890,7 @@ async function runOnSandboxAttached(
     onLog(`[sandbox-${index}] Error: ${errMsg}`);
     return {
       sandboxIndex: index,
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandbox.name,
       success: false,
       filesProcessed: 0,
       error: errMsg,
