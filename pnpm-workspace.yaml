@@ -35,3 +35,7 @@ allowBuilds:
 # vetting point here: CI installs with --frozen-lockfile, so every version
 # in it was resolved and reviewed when it was committed.
 minimumReleaseAge: 0
+
+auditConfig:
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm
