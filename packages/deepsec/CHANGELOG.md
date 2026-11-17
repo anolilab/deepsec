@@ -1,3 +1,15 @@
+## [2.4.1](https://github.com/anolilab/deepsec/compare/v2.4.0...v2.4.1) (2026-11-17)
+
+### Bug Fixes
+
+* **init:** run the login hint outside devEngines and detect quoted strictDepBuilds ([b7ab7ce](https://github.com/anolilab/deepsec/commit/b7ab7cecd1b25ab0efa4b16b5e447a482a021478))
+* **init:** support pnpm 11+ and devEngines repositories ([fb6d64c](https://github.com/anolilab/deepsec/commit/fb6d64c1d44d62b5081587d02acc660ed16f4899)), closes [vercel-labs/deepsec#197](https://github.com/vercel-labs/deepsec/issues/197)
+
+### Miscellaneous Chores
+
+* **deps:** fix pnpm audit vulnerabilities ([239b4a7](https://github.com/anolilab/deepsec/commit/239b4a754a88442083979360f7861efb338ae41f))
+* **deps:** update the Claude, Codex, and pi agent SDKs ([3ac8fe1](https://github.com/anolilab/deepsec/commit/3ac8fe1f0d706e35d695cc46e08313409b823c21)), closes [vercel-labs/deepsec#195](https://github.com/vercel-labs/deepsec/issues/195)
+
 ## [2.4.0](https://github.com/anolilab/deepsec/compare/v2.3.10...v2.4.0) (2026-10-07)
 
 ### Features
