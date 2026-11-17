@@ -51,7 +51,7 @@ export function reconcilePnpmWorkspace(workspaceDir: string): void {
   } catch {
     return;
   }
-  if (/^strictDepBuilds:/m.test(content)) return;
+  if (/^["']?strictDepBuilds["']?\s*:/m.test(content)) return;
   const separator = content === "" || content.endsWith("\n") ? "" : "\n";
   fs.writeFileSync(file, `${content}${separator}strictDepBuilds: false\n`);
 }

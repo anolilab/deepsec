@@ -27,7 +27,10 @@ describe("headless setup plan", () => {
     expect(plan.missingInputs).toContain("vercel.authentication");
     expect(plan.actions).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: "vercel-login", commands: ["npx vercel login"] }),
+        expect.objectContaining({
+          id: "vercel-login",
+          commands: [`cd '${os.tmpdir()}'`, "npx vercel login"],
+        }),
         expect.objectContaining({
           id: "vercel-link-workspace",
           commands: [expect.stringContaining(workspace), "npx vercel link"],

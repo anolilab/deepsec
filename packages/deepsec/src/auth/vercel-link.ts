@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { atomicWriteFile } from "../atomic-file.js";
@@ -58,9 +59,12 @@ export function vercelAuthRecoveryActions(
     {
       id: "vercel-login",
       description: "Ask the user to authenticate in a terminal, then continue setup.",
-      commands: existsSync(join(workspaceDir, "package.json"))
-        ? [`cd ${shellArg(workspaceDir)}`, "npx vercel login"]
-        : ["npx vercel login"],
+      // Before scaffolding, the workspace does not exist yet. Login is global,
+      // so run it from the temp directory, outside any `devEngines` scope.
+      commands: [
+        `cd ${shellArg(existsSync(join(workspaceDir, "package.json")) ? workspaceDir : tmpdir())}`,
+        "npx vercel login",
+      ],
     },
     ...(!alreadyLinked
       ? [

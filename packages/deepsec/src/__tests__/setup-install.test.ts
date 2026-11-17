@@ -90,8 +90,13 @@ describe("pnpm workspace reconciliation", () => {
   it("keeps an explicit strictDepBuilds setting", () => {
     const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "deepsec-install-"));
     const file = path.join(workspace, "pnpm-workspace.yaml");
-    fs.writeFileSync(file, "packages: []\nstrictDepBuilds: true\n");
-    reconcilePnpmWorkspace(workspace);
-    expect(fs.readFileSync(file, "utf8")).toBe("packages: []\nstrictDepBuilds: true\n");
+    for (const content of [
+      "packages: []\nstrictDepBuilds: true\n",
+      'packages: []\n"strictDepBuilds": true\n',
+    ]) {
+      fs.writeFileSync(file, content);
+      reconcilePnpmWorkspace(workspace);
+      expect(fs.readFileSync(file, "utf8")).toBe(content);
+    }
   });
 });
