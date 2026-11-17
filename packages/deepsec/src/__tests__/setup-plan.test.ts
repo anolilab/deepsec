@@ -27,7 +27,10 @@ describe("headless setup plan", () => {
     expect(plan.missingInputs).toContain("vercel.authentication");
     expect(plan.actions).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: "vercel-login", commands: ["npx vercel login"] }),
+        expect.objectContaining({
+          id: "vercel-login",
+          commands: [`cd '${os.tmpdir()}'`, "npx vercel login"],
+        }),
         expect.objectContaining({
           id: "vercel-link-workspace",
           commands: [expect.stringContaining(workspace), "npx vercel link"],
@@ -47,5 +50,31 @@ describe("headless setup plan", () => {
       ),
     });
     expect(fs.existsSync(workspace)).toBe(false);
+  });
+
+  it("checks Vercel authentication in a private temporary directory", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "deepsec-plan-"));
+    fs.writeFileSync(path.join(root, "index.ts"), "export const value = 1;\n");
+    const workspace = path.join(root, ".deepsec");
+    fs.mkdirSync(workspace);
+    let probeCwd = "";
+    const plan = await buildSetupPlan({
+      workspaceDir: workspace,
+      projectRoot: root,
+      projectId: "app",
+      model: "gpt-5.6-sol",
+      agent: "codex",
+      deterministicProjectName: "deepsec-app-abcd1234",
+      env: {},
+      runCli: async (_args, cwd) => {
+        probeCwd = cwd;
+        expect(fs.readdirSync(cwd)).toEqual([]);
+        return { exitCode: 0, stdout: "", stderr: "" };
+      },
+    });
+
+    expect(plan.missingInputs).not.toContain("vercel.authentication");
+    expect(path.dirname(probeCwd)).toBe(os.tmpdir());
+    expect(fs.existsSync(probeCwd)).toBe(false);
   });
 });
